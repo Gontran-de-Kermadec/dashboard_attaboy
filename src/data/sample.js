@@ -128,3 +128,22 @@ export const everyDayRevenue = [
 		revenue: 5000,
 	},
 ];
+
+export const attaboy = {
+	year: 2500000,
+	month: 45000,
+	week: 7000,
+	uberYear: 83000,
+	uberMonth: 9000,
+	uberWeek: 3500,
+};
+export const ficelle = {
+	year: 500000,
+	month: 28000,
+	week: 10000,
+};
+export const yobatta = {
+	year: 1750000,
+	month: 30000,
+	week: 4000,
+};

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
@@ -21,17 +21,20 @@ import {
 import { Link } from "react-router-dom";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { KeyboardArrowDown } from "@mui/icons-material";
+import { RestaurantContext, ThemeContext } from "../App";
 // import { useNavigate, Link } from "react-router-dom";
 
 function Sidebar() {
 	const [anchorEl, setAnchorEl] = useState(null);
 	const open = Boolean(anchorEl);
 	console.log(open);
-	const [store, setStore] = useState("Attaboy");
+	// const [store, setStore] = useState("Attaboy");
+	const [activeRestaurant, setActiveRestaurant] = useContext(RestaurantContext);
+	//const [color, setColor] = useState();
+	const [colorTheme] = useContext(ThemeContext);
 	const selectStore = (e) => {
-		//console.log(e.currentTarget.innerText);
-		setStore(e.currentTarget.innerText);
-		//setStore(e.currentTarget.value);
+		//setStore(e.currentTarget.innerText);
+		setActiveRestaurant(e.currentTarget.innerText.toLowerCase());
 	};
 	const handleClick = (e) => {
 		console.log(e.currentTarget);
@@ -40,6 +43,43 @@ function Sidebar() {
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
+	// useEffect(() => {
+	// 	const changeTheme = () => {
+	// 		// switch (activeRestaurant) {
+	// 		// 	case "attaboy":
+	// 		// 		setColor("#FFD702");
+	// 		// 		break;
+	// 		// 	case "ficelle":
+	// 		// 		setColor("#3C6843");
+	// 		// 		break;
+	// 		// 	case "yobatta":
+	// 		// 		setColor("#D55D8D");
+	// 		// 		break;
+	// 		// 	default:
+	// 		// 		console.log("not working");
+	// 		// 		break;
+	// 		// }
+	// 		switch (activeRestaurant) {
+	// 			case "attaboy":
+	// 				//setColor("#FFD702");
+	// 				setColorTheme("#FFD702");
+	// 				break;
+	// 			case "ficelle":
+	// 				//setColor("#3C6843");
+	// 				setColorTheme("#3C6843");
+	// 				break;
+	// 			case "yobatta":
+	// 				//setColor("#D55D8D");
+	// 				setColorTheme("#D55D8D");
+	// 				break;
+	// 			default:
+	// 				console.log("not working");
+	// 				break;
+	// 		}
+	// 	};
+	// 	changeTheme();
+	// }, [activeRestaurant, setColorTheme]);
+	//console.log(color);
 	const menuItems = ["Caisse", "Revenus", "Dépenses"];
 	const menu = [
 		{
@@ -79,11 +119,13 @@ function Sidebar() {
 						sx={{
 							width: "100%",
 							color: "white",
-							backgroundColor: "blue",
+							// backgroundColor: color,
+							backgroundColor: colorTheme,
 							fontSize: "1.2em",
 							borderRadius: "inherit",
 							"&:hover": {
-								backgroundColor: "blue",
+								// backgroundColor: color,
+								backgroundColor: colorTheme,
 							},
 						}}
 						id="store-button"
@@ -93,7 +135,8 @@ function Sidebar() {
 						onClick={handleClick}
 						endIcon={<KeyboardArrowDown />}
 					>
-						{store}
+						{/* {store} */}
+						{activeRestaurant}
 					</Button>
 					<Menu
 						sx={{

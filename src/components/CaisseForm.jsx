@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { Button, Container, Typography } from "@mui/material";
@@ -6,6 +6,20 @@ import { styled } from "@mui/system";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { db } from "../firebaseConfig";
+import { RestaurantContext } from "../App";
+import moment from "moment";
+//firestore
+import {
+	doc,
+	setDoc,
+	collection,
+	addDoc,
+	Timestamp,
+	getDoc,
+} from "firebase/firestore";
+
+//console.log(db);
 // import {  } from "react";
 
 const CustomButton = styled(Button)`
@@ -16,12 +30,14 @@ const CustomButton = styled(Button)`
 const CustomTitle = styled(Typography)`
 	font-size: 1.2em;
 `;
-let fakeDataBase = {};
 
 function CaisseForm() {
 	const [total, setTotal] = useState(0);
 	const [totalTips, setTotalTips] = useState(0);
 	const [date, setDate] = useState();
+	const [timeStampDate, setTimeStampDate] = useState();
+	const [selectedYear, setSelectedYear] = useState();
+	const [activeRestaurant] = useContext(RestaurantContext);
 	//disable input
 	// const [argent, setArgent] = useState(false);
 	// const [tpv, setTpv] = useState(false);
@@ -30,18 +46,18 @@ function CaisseForm() {
 	// const [doordashInput, setDoordashInput] = useState(false);
 	// const [restoInput, setRestoInput] = useState(false);
 	//amount just added in input
-	const [tpvNumber, setTpvNumber] = useState();
-	const [argentNumber, setArgentNumber] = useState();
-	const [wixNumber, setWixNumber] = useState();
-	const [uberNumber, setUberNumber] = useState();
-	const [doordashNumber, setDoordashNumber] = useState();
-	const [restoNumber, setRestoNumber] = useState();
+	const [tpvNumber, setTpvNumber] = useState(0);
+	const [argentNumber, setArgentNumber] = useState(0);
+	const [wixNumber, setWixNumber] = useState(0);
+	const [uberNumber, setUberNumber] = useState(0);
+	const [doordashNumber, setDoordashNumber] = useState(0);
+	const [restoNumber, setRestoNumber] = useState(0);
 	// amount tips just added in input
-	const [tpvTips, setTpvTips] = useState();
-	const [wixTips, setWixTips] = useState();
-	const [uberTips, setUberTips] = useState();
-	const [doordashTips, setDoordashTips] = useState();
-	const [restoTips, setRestoTips] = useState();
+	const [tpvTips, setTpvTips] = useState(0);
+	const [wixTips, setWixTips] = useState(0);
+	const [uberTips, setUberTips] = useState(0);
+	const [doordashTips, setDoordashTips] = useState(0);
+	const [restoTips, setRestoTips] = useState(0);
 	//button invisible
 	//const [invisible, setInvisible] = useState(true);
 	const [argentButton, setArgentButton] = useState(true);
@@ -50,6 +66,27 @@ function CaisseForm() {
 	const [uberButton, setUberButton] = useState(true);
 	const [doordashButton, setDoordashButton] = useState(true);
 	const [restoButton, setRestoButton] = useState(true);
+
+	const tipsSummary = {
+		date: date,
+		tpv: tpvTips,
+		wix: wixTips,
+		uber: uberTips,
+		doordash: doordashTips,
+		restoloco: restoTips,
+		total: totalTips,
+	};
+	const salesSummary = {
+		date: date,
+		timestamp: timeStampDate,
+		tpv: tpvNumber,
+		wix: wixNumber,
+		uber: uberNumber,
+		doordash: doordashNumber,
+		restoloco: restoNumber,
+		total: total,
+	};
+
 	const updateTotal = () => {
 		const tpvAmount = tpvNumber === undefined ? Number(0) : tpvNumber;
 		const argentAmount = argentNumber === undefined ? Number(0) : argentNumber;
@@ -79,11 +116,29 @@ function CaisseForm() {
 		let sum = tpvAmount + wixAmount + uberAmount + doordashAmount + restoAmount;
 		setTotalTips(sum);
 	};
-	const getValue = (e) => {
-		let date = e.$d;
-		console.log(Date.parse(date));
-		console.log(e.$d);
-		setDate(e.$d);
+	const getSelectedDate = (e) => {
+		console.log(e);
+		//let selectedDate = e.$d;
+		let day = e.$d.getDate();
+		console.log(day);
+		let month = e.$d.getMonth();
+		console.log(month);
+		let year = e.$d.getFullYear();
+		console.log(year);
+		setSelectedYear(year);
+		console.log(selectedYear);
+		const momentDate = moment()
+			.date(day)
+			.month(month)
+			.year(year)
+			.format("DD MM YYYY");
+
+		setDate(momentDate);
+		const testDate = Timestamp.fromDate(e.$d);
+		setTimeStampDate(testDate);
+		//console.log(date);
+		//console.log(timeStampDate);
+		setError(false);
 	};
 	// const disableInput = (e) => {
 	// 	switch (e.target.id) {
@@ -204,31 +259,103 @@ function CaisseForm() {
 	// 	// setTotal(sum);
 	// };
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
+		console.log(timeStampDate, selectedYear);
+		if (timeStampDate === undefined) {
+			setError(true);
+			console.log(error);
+			return;
+		}
 		console.log("submitted");
-		//console.log(tpvNumber, argentNumber);
-		const caisse = {
-			//date: date,
-			ventes: {
-				argent: argentNumber,
-				tpv: tpvNumber,
-				//total: total,
-			},
-			tips: {
-				tpv: tpvTips,
-				//total: totalTips,
-			},
-			totalVentes: total,
-			totalTips: totalTips,
-		};
-		console.log(caisse);
+		// const caisse = {
+		// 	//date: date,
+		// 	ventes: {
+		// 		argent: argentNumber,
+		// 		tpv: tpvNumber,
+		// 		//total: total,
+		// 	},
+		// 	tips: {
+		// 		tpv: tpvTips,
+		// 		//total: totalTips,
+		// 	},
+		// 	totalVentes: total,
+		// 	totalTips: totalTips,
+		// };
+		// console.log(caisse);
 		//fakeDataBase.push(caisse);
-		fakeDataBase[date] = caisse;
+		//fakeDataBase[date] = caisse;
 		//Object.assign(fakeDataBase, { date: caisse });
-		console.log(fakeDataBase);
+		//console.log(fakeDataBase);
+		// Add a new document in collection "cities"
+		// await setDoc(
+		// 	doc(db, "tips"),
+		// 	// doc(db, "tips", date),
+		// 	tipsSummary
+		// );
+		await setDoc(doc(db, "ventes", date), salesSummary);
+		// const newData = {
+		// 	tpv: tpvTips,
+		// 	wix: wixTips,
+		// };
+		// fakeDataBase[date] = newData;
+		const docRef = await addDoc(collection(db, "tips"), tipsSummary);
+		console.log("Document written with ID: ", docRef.id);
+		// await setDoc(
+		// 	doc(db, "attaboy"),
+		// 	salesSummary
+		// );
+
+		//const docRef = doc(db, "customers", user.uid);
+		console.log(activeRestaurant);
+		const userDoc = await addDoc(
+			collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
+			// collection(db, `ventes/attaboy/${2023}`),
+			salesSummary
+		);
+		// const userDoc = await setDoc(
+		// 	doc(db, "ventes/attaboy/2022"),
+		// 	salesSummary
+		// );
+		// const userDoc = await addDoc(collection(db, "attaboy"), { test: "blabla" });
+		//const testCollection = collection(db, "attaboy", userDoc.id, "ventes");
+
+		//const subColl = await addDoc(testCollection, salesSummary);
+		console.log("Document written with ID: " + userDoc.id);
+		// console.log(userDoc);
 	};
 
+	// useEffect(() => {
+	// 	const testA = async () => {
+	// 		const attaRef = doc(db, "attaboy", "ventes");
+	// 		const docSnap = await getDoc(attaRef);
+
+	// 		if (docSnap.exists()) {
+	// 			console.log("Document data:", docSnap.data());
+	// 		} else {
+	// 			// docSnap.data() will be undefined in this case
+	// 			console.log("No such document!");
+	// 		}
+	// 	};
+	// 	testA();
+	// }, []);
+	const [error, setError] = React.useState(false);
+	//const helperText = error ? "Selectionner une date" : "";
+	const errorMessage = React.useMemo(() => {
+		if (error) {
+			return "Selectionner une date";
+		}
+		// switch (error) {
+		//   case 'maxDate':
+		//   case 'minDate': {
+		// 	return 'Please select a date in the first quarter of 2022';
+		//   }
+
+		//   default: {
+		// 	return '';
+		//   }
+		//}
+	}, [error]);
 	return (
 		<Box
 			component="form"
@@ -247,12 +374,22 @@ function CaisseForm() {
 						transform: "translateX(-50%)",
 					}}
 					onChange={(e) => {
-						getValue(e);
+						getSelectedDate(e);
 					}}
 					label="Choisir une date"
+					disableFuture
+					onError={(newError) => setError(newError)}
+					//error={error}
+					//helperText={helperText}
+					slotProps={{
+						textField: {
+							helperText: errorMessage,
+						},
+					}}
 				/>
 				{/* </DemoContainer> */}
 			</LocalizationProvider>
+			{/* {error ? <p>Selection date</p> : null} */}
 			<div>
 				<CustomTitle>ARGENT</CustomTitle>
 				<Container

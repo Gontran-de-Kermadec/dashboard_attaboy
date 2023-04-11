@@ -64,6 +64,37 @@ function BarComparison() {
 	};
 	return <Bar data={data} options={options} />;
 }
+function BarRevenue() {
+	const labels = ["Argent", "TPV", "Uber", "Wix", "Doordash"];
+	// let labelYear = [];
+	// let revenueYear = [];
+	// let expenseYear = [];
+	// yearlyCA.map((x) => {
+	// 	labelYear = [...labelYear, x.year];
+	// 	revenueYear = [...revenueYear, x.revenue];
+	// 	expenseYear = [...expenseYear, x.expense];
+	// 	console.log(labelYear);
+	// 	return "";
+	// });
+	const data = {
+		labels: labels,
+		datasets: [
+			{
+				//label: "Argent",
+				//data: revenueYear,
+				data: ["1000", "200", "5000", "3500", "700"],
+				//backgroundColor: "rgba(255, 99, 132, 0.5)",
+			},
+			// {
+			// 	//label: "Depenses",
+			// 	data: expenseYear,
+			// 	data: ["700", "300"],
+			// 	backgroundColor: "rgba(135, 206, 250, 0.5)",
+			// },
+		],
+	};
+	return <Bar data={data} options={options} />;
+}
 
 function BarChart() {
 	ChartJS.register(
@@ -102,4 +133,4 @@ function BarChart() {
 }
 
 //export default BarChart;
-export { BarChart, BarComparison };
+export { BarChart, BarComparison, BarRevenue };

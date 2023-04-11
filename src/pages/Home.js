@@ -11,7 +11,7 @@ import {
 import { Box } from "@mui/system";
 import React from "react";
 import Sidebar from "../components/Sidebar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import "../Home.css";
 import styled from "@emotion/styled";
 import MovingIcon from "@mui/icons-material/Moving";
@@ -19,28 +19,34 @@ import PieChart from "../components/charts/PieChart";
 import LineChart from "../components/charts/LineChart";
 import { BarChart, BarComparison } from "../components/charts/BarChart";
 import { caNumbers, orderNumbers, avgTicketNumbers } from "../data/sample";
+import { PeriodContext } from "../App";
+import Period from "../components/Period";
+
+// import { collection, query, where, getDocs } from "firebase/firestore";
+// import { db } from "../firebaseConfig";
+
 const Item = styled(Paper)(({ theme }) => ({
 	textAlign: "center",
 	width: "30%",
 }));
 
 function Home() {
-	const [activePeriod, setActivePeriod] = useState("annee");
+	const [activePeriod, setActivePeriod] = useContext(PeriodContext);
 	const [revenue, setRevenue] = useState(null);
 	const [order, setOrder] = useState(null);
 	const [avgTicket, setAvgTicket] = useState(null);
 	const handleChange = (e, newPeriod) => {
 		setActivePeriod(newPeriod);
 	};
-	const displayRevenue = () => {
-		if (activePeriod === "annee") {
-			return caNumbers.year;
-		} else if (activePeriod === "mois") {
-			return caNumbers.month;
-		} else {
-			return caNumbers.week;
-		}
-	};
+	// const displayRevenue = () => {
+	// 	if (activePeriod === "annee") {
+	// 		return caNumbers.year;
+	// 	} else if (activePeriod === "mois") {
+	// 		return caNumbers.month;
+	// 	} else {
+	// 		return caNumbers.week;
+	// 	}
+	// };
 	useEffect(() => {
 		const displayData = () => {
 			if (activePeriod === "annee") {
@@ -58,11 +64,49 @@ function Home() {
 			}
 		};
 		displayData();
-
-		//   return () => {
-		// 	second
-		//   }
 	}, [activePeriod]);
+
+	// const getData = async () => {
+	// 	// const docRef = doc(db, "ventes");
+	// 	// const docSnap = await getDoc(docRef);
+	// 	// if (docSnap.exists()) {
+	// 	// 	console.log("Document data:", docSnap.data());
+	// 	// } else {
+	// 	// 	// docSnap.data() will be undefined in this case
+	// 	// 	console.log("No such document!");
+	// 	// }
+	// 	const startOfToday = new Date();
+	// 	const startDate = new Date("04-01-2023");
+	// 	const endDate = new Date("04-30-2023");
+	// 	//startOfToday.setUTCHours(0, 0, 0, 0);
+	// 	//let time = new Date(2023, 3, 5);
+	// 	let time = new Date("04-02-2023");
+	// 	//console.log(startOfToday);
+	// 	console.log(time);
+	// 	//firebase.firestore().collection("cities").where("timestamp", ">", start)
+
+	// 	const q = query(
+	// 		collection(db, "ventes")
+	// 		//where("date", "==", "Monday 27 March 2023 13")
+	// 	);
+	// 	const q2 = query(
+	// 		collection(db, "ventes"),
+	// 		where("timestamp", "<", startOfToday)
+	// 	);
+	// 	const q3 = query(collection(db, "ventes"), where("timestamp", "==", time));
+	// 	const q4 = query(
+	// 		collection(db, "ventes"),
+	// 		where("timestamp", ">=", startDate),
+	// 		where("timestamp", "<=", endDate)
+	// 	);
+
+	// 	const querySnapshot = await getDocs(q4);
+	// 	querySnapshot.forEach((doc) => {
+	// 		// doc.data() is never undefined for query doc snapshots
+	// 		console.log(doc.id, " => ", doc.data());
+	// 	});
+	// };
+	// getData();
 
 	return (
 		<div className="flex">
@@ -82,7 +126,7 @@ function Home() {
 					<ToggleButton value="semaine">Semaine</ToggleButton>
 					</ToggleButtonGroup>
 				</Box> */}
-					<Box>
+					{/* <Box>
 						<Tabs
 							value={activePeriod}
 							onChange={handleChange}
@@ -92,7 +136,8 @@ function Home() {
 							<Tab value="mois" label="Mois" />
 							<Tab value="semaine" label="Semaine" />
 						</Tabs>
-					</Box>
+					</Box> */}
+					<Period />
 					<Box
 						sx={{
 							display: "flex",
@@ -102,18 +147,6 @@ function Home() {
 							//width: "100%",
 						}}
 					>
-						{/* <Paper elevation={1}>
-							<p>Chiffres d'affaires hors taxes</p>
-							<p>25689</p>
-						</Paper>
-						<Paper elevation={1}>
-							<p>Nombres de tickets</p>
-							<p>123</p>
-						</Paper> */}
-						{/* <Paper elevation={1}>
-							<p>Ticket moyen</p>
-							<p>29,6$</p>
-						</Paper> */}
 						<Item elevation={1}>
 							<p>Chiffres d'affaires hors taxes</p>
 							<div>

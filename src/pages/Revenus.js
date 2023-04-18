@@ -16,173 +16,227 @@ import { ficelle, attaboy, yobatta } from "../data/sample";
 import { BarRevenue } from "../components/charts/BarChart";
 import PieChart from "../components/charts/PieChart";
 import LineChart from "../components/charts/LineChart";
+import AttaboyRevenue from "../components/AttaboyRevenue";
+import FicelleRevenue from "../components/FicelleRevenue";
 
 // import { getData, annualCA as caAnnuel, getAnnualCA } from "../data/getData";
 
 function Revenus() {
-	// getData();
+	// react context variable
 	const [activePeriod] = useContext(PeriodContext);
 	const [activeRestaurant] = useContext(RestaurantContext);
+	const [colorTheme] = useContext(ThemeContext);
 	const [data, setData] = useState([]);
+
+	// revenue sources
 	const [annualCA, setannualCA] = useState(0);
 	const [revenue, setRevenue] = useState(0);
-	const [colorTheme] = useContext(ThemeContext);
+	const [uberRevenue, setUberRevenue] = useState(0);
+	const [tpvRevenue, setTpvRevenue] = useState(0);
+	const [argentRevenue, setArgentRevenue] = useState(0);
+	const [wixRevenue, setWixRevenue] = useState(0);
+	const [doordashRevenue, setDoordashRevenue] = useState(0);
+	const [restoLocoRevenue, setRestoLocoRevenue] = useState(0);
 
 	const Item = styled(Paper)(({ theme }) => ({
 		textAlign: "center",
-		width: "30%",
+		width: "25%",
 		margin: "0.5em",
+		padding: "0.5em",
 		background: colorTheme,
 	}));
 	const StyledTypo = styled(Typography)(({ theme }) => ({
-		fontSize: "1.5em",
-		margin: "0.5em",
+		fontSize: "1.2em",
+		margin: "0.3em",
 		color: activeRestaurant === "ficelle" ? "#fff" : "#000",
 	}));
 	//firestore fetching
 
-	// useEffect(() => {
-	// 	let startDate;
-	// 	const date = new Date();
-	// 	const currentYear = new Date().getFullYear();
-	// 	const todayDate = new Date(
-	// 		date.getFullYear(),
-	// 		date.getMonth(),
-	// 		date.getDate()
-	// 	);
-	// 	if (activePeriod === "annee") {
-	// 		startDate = new Date(currentYear, 0, 1);
-	// 	} else if (activePeriod === "mois") {
-	// 		startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-	// 	} else if (activePeriod === "semaine") {
-	// 		startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
-	// 		console.log(startDate);
-	// 		const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
-	// 		console.log(midnightDate);
-	// 		//console.log(todayDate <= correctDate);
-	// 		// todayDate === startDate
-	// 		todayDate === startDate
-	// 			? (startDate = todayDate)
-	// 			: (startDate = midnightDate);
-	// 		//: (startDate = );
-	// 		// (startDate = new Date(date.setDate(date.getDate() - date.getDay())));
-	// 		// console.log(startDate, todayDate);
-	// 		// const q = query(
-	// 		// 	collection(db, "ventes"),
-	// 		// 	where("timestamp", "==", startDate)
-	// 		// 	// where("timestamp", "<=", todayDate)
-	// 		// 	// where("timestamp", "in", [startDate, todayDate])
-	// 		// );
-	// 		// let total = 0;
-	// 		// onSnapshot(q, (querySnapshot) => {
-	// 		// 	querySnapshot.forEach((doc) => {
-	// 		// 		total += doc.data().total;
-	// 		// 		setannualCA(Math.round(total));
-	// 		// 	});
-	// 		// 	console.log(total);
-	// 		// });
-	// 	}
-	// 	console.log(startDate, todayDate);
-	// 	console.log(activeRestaurant);
-	// 	const q = query(
-	// 		//collection(db, `ventes/attaboy/${currentYear}`),
-	// 		collection(db, `ventes/${activeRestaurant}/${currentYear}`),
-	// 		where("timestamp", ">=", startDate),
-	// 		where("timestamp", "<=", todayDate)
-	// 	);
-	// 	console.log(q);
-	// 	let total = 0;
-	// 	onSnapshot(q, (querySnapshot) => {
-	// 		querySnapshot.forEach((doc) => {
-	// 			console.log(doc);
-	// 			total += doc.data().total;
-	// 			setannualCA(Math.round(total));
-	// 		});
+	useEffect(() => {
+		let startDate;
+		const date = new Date();
+		const currentYear = new Date().getFullYear();
+		const todayDate = new Date(
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate()
+		);
+		if (activePeriod === "annee") {
+			startDate = new Date(currentYear, 0, 1);
+		} else if (activePeriod === "mois") {
+			startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+		} else if (activePeriod === "semaine") {
+			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
+			console.log(startDate);
+			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
+			console.log(midnightDate);
+			//console.log(todayDate <= correctDate);
+			// todayDate === startDate
+			todayDate === startDate
+				? (startDate = todayDate)
+				: (startDate = midnightDate);
+			//: (startDate = );
+			// (startDate = new Date(date.setDate(date.getDate() - date.getDay())));
+			// console.log(startDate, todayDate);
+			// const q = query(
+			// 	collection(db, "ventes"),
+			// 	where("timestamp", "==", startDate)
+			// 	// where("timestamp", "<=", todayDate)
+			// 	// where("timestamp", "in", [startDate, todayDate])
+			// );
+			// let total = 0;
+			// onSnapshot(q, (querySnapshot) => {
+			// 	querySnapshot.forEach((doc) => {
+			// 		total += doc.data().total;
+			// 		setannualCA(Math.round(total));
+			// 	});
+			// 	console.log(total);
+			// });
+		}
+		console.log(startDate, todayDate);
+		console.log(activeRestaurant);
+		const q = query(
+			//collection(db, `ventes/attaboy/${currentYear}`),
+			collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+			where("timestamp", ">=", startDate),
+			where("timestamp", "<=", todayDate)
+		);
+		console.log(q);
+		let total = 0;
+		let uberTotal = 0;
+		let tpvTotal = 0;
+		let argentTotal = 0;
+		let doordashTotal = 0;
+		let restoLocoTotal = 0;
+		let wixTotal = 0;
+		onSnapshot(q, (querySnapshot) => {
+			querySnapshot.forEach((doc) => {
+				// console.log(doc.data().argent);
+				total += doc.data().total;
+				uberTotal += doc.data().uber;
+				tpvTotal += doc.data().tpv;
+				argentTotal += doc.data().argent;
+				doordashTotal += doc.data().doordash;
+				wixTotal += doc.data().wix;
+				restoLocoTotal += doc.data().restoloco;
+				//setannualCA(Math.round(total));
+				//attaboyData(doc.data());
+			});
+			setUberRevenue(Math.round(uberTotal));
+			setTpvRevenue(Math.round(tpvTotal));
+			setArgentRevenue(Math.round(argentTotal));
+			setDoordashRevenue(Math.round(doordashTotal));
+			setWixRevenue(Math.round(wixTotal));
+			setRestoLocoRevenue(Math.round(restoLocoTotal));
+			setRevenue(Math.round(total));
 
-	// 		console.log(total);
-	// 	});
-	// }, [activePeriod, activeRestaurant]);
+			console.log(argentTotal);
+		});
+	}, [activePeriod, activeRestaurant]);
+	let total = 0;
+	let uberTotal = 0;
+	let tpvTotal = 0;
+	let argentTotal = 0;
+	let doordashTotal = 0;
+	let restoLocoTotal = 0;
+	let wixTotal = 0;
+	const attaboyData = (document) => {
+		console.log(document.argent);
+		total += document.total;
+		uberTotal += document.uber;
+		tpvTotal += document.tpv;
+		argentTotal += document.argent;
+		doordashTotal += document.doordash;
+		wixTotal += document.wix;
+		restoLocoTotal += document.restoloco;
+		setannualCA(Math.round(total));
+		setRevenue(Math.round(total));
+		setUberRevenue(Math.round(uberTotal));
+		setTpvRevenue(Math.round(tpvTotal));
+		setArgentRevenue(Math.round(argentTotal));
+		setDoordashRevenue(Math.round(doordashTotal));
+		setWixRevenue(Math.round(wixTotal));
+		setRestoLocoRevenue(Math.round(restoLocoTotal));
+	};
 
 	//sample data fetching
-	useEffect(() => {
-		const displayRevenue = () => {
-			if (activeRestaurant === "attaboy") {
-				if (activePeriod === "annee") {
-					setRevenue(attaboy.year);
-				} else if (activePeriod === "mois") {
-					setRevenue(attaboy.month);
-				} else {
-					setRevenue(attaboy.week);
-				}
-			} else if (activeRestaurant === "ficelle") {
-				if (activePeriod === "annee") {
-					console.log("dkddkkd");
-					setRevenue(ficelle.year);
-				} else if (activePeriod === "mois") {
-					setRevenue(ficelle.month);
-				} else {
-					setRevenue(ficelle.week);
-				}
-			} else if (activeRestaurant === "yobatta") {
-				if (activePeriod === "annee") {
-					setRevenue(yobatta.year);
-				} else if (activePeriod === "mois") {
-					setRevenue(yobatta.month);
-				} else {
-					setRevenue(yobatta.week);
-				}
-			}
+	// useEffect(() => {
+	// 	const displayRevenue = () => {
+	// 		if (activeRestaurant === "attaboy") {
+	// 			if (activePeriod === "annee") {
+	// 				setRevenue(attaboy.year);
+	// 			} else if (activePeriod === "mois") {
+	// 				setRevenue(attaboy.month);
+	// 			} else {
+	// 				setRevenue(attaboy.week);
+	// 			}
+	// 		} else if (activeRestaurant === "ficelle") {
+	// 			if (activePeriod === "annee") {
+	// 				console.log("dkddkkd");
+	// 				setRevenue(ficelle.year);
+	// 			} else if (activePeriod === "mois") {
+	// 				setRevenue(ficelle.month);
+	// 			} else {
+	// 				setRevenue(ficelle.week);
+	// 			}
+	// 		} else if (activeRestaurant === "yobatta") {
+	// 			if (activePeriod === "annee") {
+	// 				setRevenue(yobatta.year);
+	// 			} else if (activePeriod === "mois") {
+	// 				setRevenue(yobatta.month);
+	// 			} else {
+	// 				setRevenue(yobatta.week);
+	// 			}
+	// 		}
 
-			// switch (period) {
-			// 	case period === 'annee':
+	// 		// switch (period) {
+	// 		// 	case period === 'annee':
 
-			// 		break;
+	// 		// 		break;
 
-			// 	default:
-			// 		break;
-			// }
-		};
-		// const displayFicelleRevenue = () => {
-		// 	if (activePeriod === "annee" && activeRestaurant === "ficelle") {
-		// 		console.log("dkddkkd");
-		// 		setRevenue(ficelle.year);
-		// 	} else if (activePeriod === "mois" && activeRestaurant === "ficelle") {
-		// 		setRevenue(ficelle.month);
-		// 	} else {
-		// 		setRevenue(ficelle.week);
-		// 	}
-		// };
-		// const displayYobattaRevenue = () => {
-		// 	if (activePeriod === "annee" && activeRestaurant === "yobatta") {
-		// 		setRevenue(yobatta.year);
-		// 	} else if (activePeriod === "mois" && activeRestaurant === "yobatta") {
-		// 		setRevenue(yobatta.month);
-		// 	} else {
-		// 		setRevenue(yobatta.week);
-		// 	}
-		// };
-		displayRevenue();
-		// displayYobattaRevenue();
-		// displayFicelleRevenue();
-	}, [activePeriod, activeRestaurant]);
+	// 		// 	default:
+	// 		// 		break;
+	// 		// }
+	// 	};
+	// 	// const displayFicelleRevenue = () => {
+	// 	// 	if (activePeriod === "annee" && activeRestaurant === "ficelle") {
+	// 	// 		console.log("dkddkkd");
+	// 	// 		setRevenue(ficelle.year);
+	// 	// 	} else if (activePeriod === "mois" && activeRestaurant === "ficelle") {
+	// 	// 		setRevenue(ficelle.month);
+	// 	// 	} else {
+	// 	// 		setRevenue(ficelle.week);
+	// 	// 	}
+	// 	// };
+	// 	// const displayYobattaRevenue = () => {
+	// 	// 	if (activePeriod === "annee" && activeRestaurant === "yobatta") {
+	// 	// 		setRevenue(yobatta.year);
+	// 	// 	} else if (activePeriod === "mois" && activeRestaurant === "yobatta") {
+	// 	// 		setRevenue(yobatta.month);
+	// 	// 	} else {
+	// 	// 		setRevenue(yobatta.week);
+	// 	// 	}
+	// 	// };
+	// 	displayRevenue();
+	// 	// displayYobattaRevenue();
+	// 	// displayFicelleRevenue();
+	// }, [activePeriod, activeRestaurant]);
 
-	console.log(data);
 	return (
 		<div className="flex">
 			<Sidebar />
 			<Container>
 				<Period />
 				{/* <div>Revenus</div> */}
-				{data.map((x) => {
+				{/* {data.map((x) => {
 					return (
 						<div key={x.date}>
 							<p>date : {x.date}</p>
-							{/* <br /> */}
 							<p>total : {x.total}</p>
 						</div>
 					);
-				})}
-				<Typography
+				})} */}
+				{/* <Typography
 					sx={{
 						fontSize: "2em",
 						margin: "1em 0;",
@@ -192,7 +246,7 @@ function Revenus() {
 					<Typography variant="span" sx={{ color: colorTheme }}>
 						$ {revenue}
 					</Typography>
-				</Typography>
+				</Typography> */}
 				{/* <p>Chiffres d'affaires : $ {annualCA}</p> */}
 				{/* <Paper
 					elevation={1}
@@ -204,8 +258,11 @@ function Revenus() {
 						Chiffres d'affaires hors taxes: <span>$ {revenue}</span>
 					</p>
 				</Paper> */}
+				{/* <AttaboyRevenue /> */}
+				{activeRestaurant === "attaboy" ? <AttaboyRevenue /> : null}
+				{activeRestaurant === "ficelle" ? <FicelleRevenue /> : null}
 
-				<Box
+				{/* <Box
 					sx={{
 						display: "flex",
 						justifyContent: "space-around",
@@ -214,30 +271,30 @@ function Revenus() {
 				>
 					<Item>
 						<StyledTypo>Argent</StyledTypo>
-						<p>$ 2500</p>
+						<p>$ {argentRevenue}</p>
 					</Item>
 					<Item>
 						<StyledTypo>TPV</StyledTypo>
-						<p>$ 2500</p>
+						<p>$ {tpvRevenue}</p>
 					</Item>
 					<Item>
-						<StyledTypo>Wix</StyledTypo>
-						<p>$ 2500</p>
+						<StyledTypo>WIX</StyledTypo>
+						<StyledTypo>$ {wixRevenue}</StyledTypo>
 					</Item>
 					<Item>
-						<StyledTypo>Resto Loco</StyledTypo>
-						<p>$ 2500</p>
+						<StyledTypo>RESTO LOCO</StyledTypo>
+						<StyledTypo>$ {restoLocoRevenue}</StyledTypo>
 					</Item>
 					<Item>
-						<StyledTypo>Uber</StyledTypo>
-						<p>2500</p>
+						<StyledTypo>UBER</StyledTypo>
+						<StyledTypo>$ {uberRevenue}</StyledTypo>
 					</Item>
 					<Item>
 						<StyledTypo>DOORDASH</StyledTypo>
-						<p>2500</p>
+						<p>$ {doordashRevenue} </p>
 					</Item>
-				</Box>
-				<Box
+				</Box> */}
+				{/* <Box
 					sx={{
 						display: "flex",
 					}}
@@ -248,7 +305,7 @@ function Revenus() {
 					<div>
 						<PieChart />
 					</div>
-				</Box>
+				</Box> */}
 				<Divider />
 				<Box
 					sx={{

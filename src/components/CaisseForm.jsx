@@ -13,10 +13,15 @@ import moment from "moment";
 import {
 	doc,
 	setDoc,
-	collection,
 	addDoc,
 	Timestamp,
 	getDoc,
+	collection,
+	query,
+	where,
+	getDocs,
+	onSnapshot,
+	updateDoc,
 } from "firebase/firestore";
 
 //console.log(db);
@@ -37,6 +42,7 @@ function CaisseForm() {
 	const [date, setDate] = useState();
 	const [timeStampDate, setTimeStampDate] = useState();
 	const [selectedYear, setSelectedYear] = useState();
+	const [selectedDate, setSelectedDate] = useState();
 	const [activeRestaurant] = useContext(RestaurantContext);
 	//disable input
 	// const [argent, setArgent] = useState(false);
@@ -79,13 +85,27 @@ function CaisseForm() {
 	const salesSummary = {
 		date: date,
 		timestamp: timeStampDate,
-		tpv: tpvNumber,
-		wix: wixNumber,
-		uber: uberNumber,
-		doordash: doordashNumber,
-		restoloco: restoNumber,
 		total: total,
+		sourcesOfRevenues: {
+			argent: argentNumber,
+			tpv: tpvNumber,
+			wix: wixNumber,
+			restoloco: restoNumber,
+			uber: uberNumber,
+			doordash: doordashNumber,
+		},
 	};
+	// const salesSummary = {
+	// 	date: date,
+	// 	timestamp: timeStampDate,
+	// 	argent: argentNumber,
+	// 	tpv: tpvNumber,
+	// 	wix: wixNumber,
+	// 	uber: uberNumber,
+	// 	doordash: doordashNumber,
+	// 	restoloco: restoNumber,
+	// 	total: total,
+	// };
 
 	const updateTotal = () => {
 		const tpvAmount = tpvNumber === undefined ? Number(0) : tpvNumber;
@@ -117,27 +137,28 @@ function CaisseForm() {
 		setTotalTips(sum);
 	};
 	const getSelectedDate = (e) => {
-		console.log(e);
-		//let selectedDate = e.$d;
 		let day = e.$d.getDate();
 		console.log(day);
-		let month = e.$d.getMonth();
+		let month = e.$d.getMonth() + 1;
 		console.log(month);
 		let year = e.$d.getFullYear();
-		console.log(year);
+
 		setSelectedYear(year);
-		console.log(selectedYear);
 		const momentDate = moment()
 			.date(day)
 			.month(month)
 			.year(year)
-			.format("DD MM YYYY");
+			.format("MM DD YYYY");
 
-		setDate(momentDate);
+		if (day < 10) day = "0" + day;
+		if (month < 10) month = "0" + month;
+
+		const formattedDate = new Date(month + "/" + day + "/" + year);
+		console.log(formattedDate);
+		setSelectedDate(formattedDate);
+		setDate(month + "/" + day + "/" + year);
 		const testDate = Timestamp.fromDate(e.$d);
 		setTimeStampDate(testDate);
-		//console.log(date);
-		//console.log(timeStampDate);
 		setError(false);
 	};
 	// const disableInput = (e) => {
@@ -259,86 +280,80 @@ function CaisseForm() {
 	// 	// setTotal(sum);
 	// };
 
+	// firebase queries
+	// const checkingrequest = query(
+	// 	collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
+	// 	where("timestamp", "==", selectedDate)
+	// );
+	// const dataAlreadyExist = async () => {
+	// 	const checkingrequest = query(
+	// 		collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
+	// 		where("timestamp", "==", selectedDate)
+	// 	);
+	// 	const querySnapshot = await getDocs(checkingrequest);
+	// 	querySnapshot.forEach((doc) => {
+	// 		// doc.data() is never undefined for query doc snapshots
+	// 		console.log(doc.id, " => ", doc.data());
+	// 	});
+	// };
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		console.log(timeStampDate, selectedYear);
-		if (timeStampDate === undefined) {
-			setError(true);
-			console.log(error);
-			return;
-		}
-		console.log("submitted");
-		// const caisse = {
-		// 	//date: date,
-		// 	ventes: {
-		// 		argent: argentNumber,
-		// 		tpv: tpvNumber,
-		// 		//total: total,
-		// 	},
-		// 	tips: {
-		// 		tpv: tpvTips,
-		// 		//total: totalTips,
-		// 	},
-		// 	totalVentes: total,
-		// 	totalTips: totalTips,
-		// };
-		// console.log(caisse);
-		//fakeDataBase.push(caisse);
-		//fakeDataBase[date] = caisse;
-		//Object.assign(fakeDataBase, { date: caisse });
-		//console.log(fakeDataBase);
-		// Add a new document in collection "cities"
-		// await setDoc(
-		// 	doc(db, "tips"),
-		// 	// doc(db, "tips", date),
-		// 	tipsSummary
-		// );
-		await setDoc(doc(db, "ventes", date), salesSummary);
-		// const newData = {
-		// 	tpv: tpvTips,
-		// 	wix: wixTips,
-		// };
-		// fakeDataBase[date] = newData;
-		const docRef = await addDoc(collection(db, "tips"), tipsSummary);
-		console.log("Document written with ID: ", docRef.id);
-		// await setDoc(
-		// 	doc(db, "attaboy"),
-		// 	salesSummary
-		// );
-
-		//const docRef = doc(db, "customers", user.uid);
-		console.log(activeRestaurant);
-		const userDoc = await addDoc(
+		const checkingrequest = query(
 			collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
-			// collection(db, `ventes/attaboy/${2023}`),
-			salesSummary
+			where("timestamp", "==", selectedDate)
 		);
+		const querySnapshot = await getDocs(checkingrequest);
+		console.log(querySnapshot.empty);
+		if (querySnapshot.empty) {
+			console.log("create");
+			const userDoc = await addDoc(
+				collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
+				salesSummary
+			);
+			console.log("Document written with ID: " + userDoc.id);
+		} else {
+			console.log("update");
+			querySnapshot.forEach((document) => {
+				// doc.data() is never undefined for query doc snapshots
+				console.log(document.id, " => ", document.data());
+				const ref = collection(
+					db,
+					`ventes/${activeRestaurant}/${selectedYear}`
+				);
+				const docRef = doc(ref, document.id);
+				// updateDoc(
+				// 	collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
+				// 	salesSummary
+				// );
+				updateDoc(docRef, salesSummary);
+			});
+		}
+		// querySnapshot.forEach((doc) => {
+		// 	// doc.data() is never undefined for query doc snapshots
+		// 	console.log(doc.id, " => ", doc.data());
+		// });
+		// if (timeStampDate === undefined) {
+		// 	setError(true);
+		// 	console.log(error);
+		// 	return;
+		// }
+		// console.log("submitted");
+		// await setDoc(doc(db, "ventes", date), salesSummary);
+		// // const docRef = await addDoc(collection(db, "tips"), tipsSummary);
+		// // console.log("Document written with ID: ", docRef.id);
+		// console.log(activeRestaurant);
 		// const userDoc = await setDoc(
-		// 	doc(db, "ventes/attaboy/2022"),
+		// 	docRef,
+		// 	// collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
 		// 	salesSummary
 		// );
-		// const userDoc = await addDoc(collection(db, "attaboy"), { test: "blabla" });
+		// console.log("Document written with ID: " + userDoc.id);
+
 		//const testCollection = collection(db, "attaboy", userDoc.id, "ventes");
 
 		//const subColl = await addDoc(testCollection, salesSummary);
-		console.log("Document written with ID: " + userDoc.id);
-		// console.log(userDoc);
 	};
-
-	// useEffect(() => {
-	// 	const testA = async () => {
-	// 		const attaRef = doc(db, "attaboy", "ventes");
-	// 		const docSnap = await getDoc(attaRef);
-
-	// 		if (docSnap.exists()) {
-	// 			console.log("Document data:", docSnap.data());
-	// 		} else {
-	// 			// docSnap.data() will be undefined in this case
-	// 			console.log("No such document!");
-	// 		}
-	// 	};
-	// 	testA();
-	// }, []);
 	const [error, setError] = React.useState(false);
 	//const helperText = error ? "Selectionner une date" : "";
 	const errorMessage = React.useMemo(() => {

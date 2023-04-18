@@ -64,8 +64,10 @@ function BarComparison() {
 	};
 	return <Bar data={data} options={options} />;
 }
-function BarRevenue() {
-	const labels = ["Argent", "TPV", "Uber", "Wix", "Doordash"];
+function BarRevenue(props) {
+	const { dataLabel, dataNumbers } = props;
+	console.log(dataLabel);
+	//const labels = ["Argent", "TPV", "Uber", "Wix", "Doordash"];
 	// let labelYear = [];
 	// let revenueYear = [];
 	// let expenseYear = [];
@@ -77,13 +79,14 @@ function BarRevenue() {
 	// 	return "";
 	// });
 	const data = {
-		labels: labels,
+		// labels: labels,
+		labels: dataLabel,
 		datasets: [
 			{
 				//label: "Argent",
-				//data: revenueYear,
-				data: ["1000", "200", "5000", "3500", "700"],
-				//backgroundColor: "rgba(255, 99, 132, 0.5)",
+				// data: ["1000", "200", "5000", "3500", "700"],
+				data: dataNumbers,
+				backgroundColor: "rgba(255, 99, 132, 0.5)",
 			},
 			// {
 			// 	//label: "Depenses",
@@ -93,7 +96,7 @@ function BarRevenue() {
 			// },
 		],
 	};
-	return <Bar data={data} options={options} />;
+	return <Bar data={data} width={400} height={200} options={options} />;
 }
 
 function BarChart() {

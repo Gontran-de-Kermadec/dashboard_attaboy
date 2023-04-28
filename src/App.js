@@ -5,6 +5,7 @@ import Caisse from "./pages/Caisse";
 import Home from "./pages/Home";
 import Revenus from "./pages/Revenus";
 import { createContext, useState, useEffect } from "react";
+import Depenses from "./pages/Depenses";
 
 export const PeriodContext = createContext();
 export const RestaurantContext = createContext();
@@ -52,6 +53,7 @@ function App() {
 							<Route path="/" element={<Home />} />
 							<Route path="/revenus" element={<Revenus />} />
 							<Route path="/caisse" element={<Caisse />} />
+							<Route path="/depenses" element={<Depenses />} />
 						</Routes>
 					</PeriodContext.Provider>
 				</ThemeContext.Provider>

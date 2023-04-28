@@ -227,37 +227,9 @@ function Revenus() {
 			<Sidebar />
 			<Container>
 				<Period />
-				{/* <div>Revenus</div> */}
-				{/* {data.map((x) => {
-					return (
-						<div key={x.date}>
-							<p>date : {x.date}</p>
-							<p>total : {x.total}</p>
-						</div>
-					);
-				})} */}
-				{/* <Typography
-					sx={{
-						fontSize: "2em",
-						margin: "1em 0;",
-					}}
-				>
-					Chiffres d'affaires :{" "}
-					<Typography variant="span" sx={{ color: colorTheme }}>
-						$ {revenue}
-					</Typography>
-				</Typography> */}
+
 				{/* <p>Chiffres d'affaires : $ {annualCA}</p> */}
-				{/* <Paper
-					elevation={1}
-					sx={{
-						textAlign: "center",
-					}}
-				>
-					<p>
-						Chiffres d'affaires hors taxes: <span>$ {revenue}</span>
-					</p>
-				</Paper> */}
+
 				{/* <AttaboyRevenue /> */}
 				{activeRestaurant === "attaboy" ? <AttaboyRevenue /> : null}
 				{activeRestaurant === "ficelle" ? <FicelleRevenue /> : null}
@@ -294,20 +266,8 @@ function Revenus() {
 						<p>$ {doordashRevenue} </p>
 					</Item>
 				</Box> */}
-				{/* <Box
-					sx={{
-						display: "flex",
-					}}
-				>
-					<div>
-						<BarRevenue />
-					</div>
-					<div>
-						<PieChart />
-					</div>
-				</Box> */}
 				<Divider />
-				<Box
+				{/* <Box
 					sx={{
 						display: "flex",
 						justifyContent: "space-around",
@@ -340,9 +300,6 @@ function Revenus() {
 						<p>Semaine : 13</p>
 						<p>$ 3000</p>
 					</Item>
-				</Box>
-				{/* <Box>
-					<LineChart />
 				</Box> */}
 			</Container>
 		</div>

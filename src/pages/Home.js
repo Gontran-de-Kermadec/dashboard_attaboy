@@ -150,18 +150,7 @@ function Home() {
 						<Item elevation={1}>
 							<p>Chiffres d'affaires hors taxes</p>
 							<div>
-								{/* <p>$ {displayRevenue()}</p> */}
 								<p>$ {revenue}</p>
-								{/* <p>$ {caNumbers.year}</p> */}
-								{/* <Box
-									sx={{
-										display: "flex",
-										//justifyContent: "space-evenly",
-									}}
-								>
-									<MovingIcon />
-									<p>+25%</p>
-								</Box> */}
 							</div>
 						</Item>
 						<Item elevation={1}>

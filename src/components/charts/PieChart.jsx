@@ -2,8 +2,9 @@ import React from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
 
-function PieChart() {
+function PieChart(props) {
 	ChartJS.register(ArcElement, Tooltip, Legend);
+	const { dataLabel, dataNumbers } = props;
 	const chartOptions = {
 		cutout: "80%",
 		plugins: {
@@ -17,11 +18,13 @@ function PieChart() {
 		},
 	};
 	const data = {
-		labels: ["Argent", "Tpv", "Uber", "Doordash", "wix", "Resto Loco"],
+		// labels: ["Argent", "Tpv", "Uber", "Doordash", "wix", "Resto Loco"],
+		labels: dataLabel,
 		datasets: [
 			{
 				label: "CA",
-				data: [1200, 1900, 200, 300, 300, 150],
+				// data: [1200, 1900, 200, 300, 300, 150],
+				data: dataNumbers,
 				backgroundColor: [
 					"rgba(255, 99, 132, 1)",
 					"rgba(54, 162, 235, 1)",

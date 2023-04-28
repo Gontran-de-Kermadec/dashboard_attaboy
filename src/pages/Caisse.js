@@ -16,7 +16,7 @@ function Caisse() {
 		<>
 			<div className="flex">
 				<Sidebar />
-				<div>
+				<div className="caisse__container">
 					<div>Caisse</div>
 					{/* <LocalizationProvider dateAdapter={AdapterDayjs}>
 						<DatePicker

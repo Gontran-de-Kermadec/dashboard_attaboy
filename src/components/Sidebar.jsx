@@ -88,7 +88,7 @@ function Sidebar() {
 		},
 		{
 			title: "Finances",
-			section: ["Caisse", "Revenus", "Dépenses"],
+			section: ["Caisse", "Revenus", "Depenses"],
 		},
 		{
 			title: "Employés",
@@ -135,14 +135,13 @@ function Sidebar() {
 						onClick={handleClick}
 						endIcon={<KeyboardArrowDown />}
 					>
-						{/* {store} */}
 						{activeRestaurant}
 					</Button>
 					<Menu
 						sx={{
 							"& .MuiPaper-root": {
 								width: 160,
-								color: "red",
+								color: colorTheme,
 							},
 						}}
 						id="store-menu"

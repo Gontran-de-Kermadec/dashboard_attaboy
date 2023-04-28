@@ -7,7 +7,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { db } from "../firebaseConfig";
-import { RestaurantContext } from "../App";
+import { RestaurantContext, ThemeContext } from "../App";
 import moment from "moment";
 //firestore
 import {
@@ -35,15 +35,24 @@ const CustomButton = styled(Button)`
 const CustomTitle = styled(Typography)`
 	font-size: 1.2em;
 `;
+const CustomInputContainer = styled(Container)`
+	padding: 1em;
+	text-align: center;
+`;
 
 function CaisseForm() {
 	const [total, setTotal] = useState(0);
+	const [totalToDisplay, setTotalToDisplay] = useState(0);
 	const [totalTips, setTotalTips] = useState(0);
 	const [date, setDate] = useState();
 	const [timeStampDate, setTimeStampDate] = useState();
 	const [selectedYear, setSelectedYear] = useState();
 	const [selectedDate, setSelectedDate] = useState();
+
+	//context variables
 	const [activeRestaurant] = useContext(RestaurantContext);
+	const [colorTheme] = useContext(ThemeContext);
+	console.log(activeRestaurant);
 	//disable input
 	// const [argent, setArgent] = useState(false);
 	// const [tpv, setTpv] = useState(false);
@@ -73,6 +82,9 @@ function CaisseForm() {
 	const [doordashButton, setDoordashButton] = useState(true);
 	const [restoButton, setRestoButton] = useState(true);
 
+	const removeTaxes = (amount) => {
+		return amount - amount * (15 / 100);
+	};
 	const tipsSummary = {
 		date: date,
 		tpv: tpvTips,
@@ -87,11 +99,14 @@ function CaisseForm() {
 		timestamp: timeStampDate,
 		total: total,
 		sourcesOfRevenues: {
-			argent: argentNumber,
-			tpv: tpvNumber,
+			argent: removeTaxes(argentNumber),
+			// argent: argentNumber,
+			tpv: removeTaxes(tpvNumber),
+			// tpv: tpvNumber,
 			wix: wixNumber,
 			restoloco: restoNumber,
-			uber: uberNumber,
+			uber: removeTaxes(uberNumber),
+			// uber: uberNumber,
 			doordash: doordashNumber,
 		},
 	};
@@ -109,21 +124,34 @@ function CaisseForm() {
 
 	const updateTotal = () => {
 		const tpvAmount = tpvNumber === undefined ? Number(0) : tpvNumber;
+		const tpvAmountTaxesFree =
+			tpvNumber === undefined ? Number(0) : removeTaxes(tpvNumber);
 		const argentAmount = argentNumber === undefined ? Number(0) : argentNumber;
+		const argentAmountTaxesFree =
+			argentNumber === undefined ? Number(0) : removeTaxes(argentNumber);
 		const wixAmount = wixNumber === undefined ? Number(0) : wixNumber;
 		const uberAmount = uberNumber === undefined ? Number(0) : uberNumber;
+		const uberAmountTaxesFree =
+			uberNumber === undefined ? Number(0) : removeTaxes(uberNumber);
 		const doordashAmount =
 			doordashNumber === undefined ? Number(0) : doordashNumber;
 		const restoAmount = restoNumber === undefined ? Number(0) : restoNumber;
-
 		let sum =
+			tpvAmountTaxesFree +
+			argentAmountTaxesFree +
+			wixAmount +
+			uberAmountTaxesFree +
+			doordashAmount +
+			restoAmount;
+		setTotal(sum);
+		let sumToDisplay =
 			tpvAmount +
 			argentAmount +
 			wixAmount +
 			uberAmount +
 			doordashAmount +
 			restoAmount;
-		setTotal(sum);
+		setTotalToDisplay(sumToDisplay);
 	};
 	const updateTotalTips = () => {
 		const tpvAmount = tpvTips === undefined ? Number(0) : tpvTips;
@@ -144,11 +172,11 @@ function CaisseForm() {
 		let year = e.$d.getFullYear();
 
 		setSelectedYear(year);
-		const momentDate = moment()
-			.date(day)
-			.month(month)
-			.year(year)
-			.format("MM DD YYYY");
+		// const momentDate = moment()
+		// 	.date(day)
+		// 	.month(month)
+		// 	.year(year)
+		// 	.format("MM DD YYYY");
 
 		if (day < 10) day = "0" + day;
 		if (month < 10) month = "0" + month;
@@ -215,50 +243,7 @@ function CaisseForm() {
 	// 			return null;
 	// 	}
 	// };
-	const makeButtonVisible = (e) => {
-		switch (e.target.id) {
-			case "argent":
-				return setArgentButton(false);
-			case "tpv":
-				return setTpvButton(false);
-			case "wix":
-				return setWixButton(false);
-			case "uber":
-				return setUberButton(false);
-			case "doordash":
-				return setDoordashButton(false);
-			case "resto":
-				return setRestoButton(false);
-			// case 'error':
-			//   return <Error text={text} />
-			default:
-				return null;
-		}
-		// if(e.target.id === "argent")
-		// setArgent(true);
-	};
-	const makeButtonInvisible = (e) => {
-		switch (e.target.id) {
-			case "argent_modify":
-				return setArgentButton(true);
-			case "tpv_modify":
-				return setTpvButton(true);
-			case "wix_modify":
-				return setWixButton(true);
-			case "uber_modify":
-				return setUberButton(true);
-			case "doordash_modify":
-				return setDoordashButton(true);
-			case "resto_modify":
-				return setRestoButton(true);
-			// case 'error':
-			//   return <Error text={text} />
-			default:
-				return null;
-		}
-		// if(e.target.id === "argent")
-		// setArgent(true);
-	};
+
 	// const removeNumber = (e) => {
 	// 	let totalNumber = Number(total);
 	// 	console.log(e.target.id);
@@ -290,12 +275,6 @@ function CaisseForm() {
 	// 		collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
 	// 		where("timestamp", "==", selectedDate)
 	// 	);
-	// 	const querySnapshot = await getDocs(checkingrequest);
-	// 	querySnapshot.forEach((doc) => {
-	// 		// doc.data() is never undefined for query doc snapshots
-	// 		console.log(doc.id, " => ", doc.data());
-	// 	});
-	// };
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -375,6 +354,7 @@ function CaisseForm() {
 		<Box
 			component="form"
 			sx={{
+				padding: "1em",
 				"& .MuiTextField-root": { m: 1, width: "25ch" },
 			}}
 			noValidate
@@ -407,11 +387,7 @@ function CaisseForm() {
 			{/* {error ? <p>Selection date</p> : null} */}
 			<div>
 				<CustomTitle>ARGENT</CustomTitle>
-				<Container
-					sx={{
-						padding: "1em",
-					}}
-				>
+				<CustomInputContainer>
 					<TextField
 						//disabled={argent}
 						//error
@@ -425,7 +401,6 @@ function CaisseForm() {
 						onBlur={(e) => {
 							updateTotal();
 							// disableInput(e);
-							// makeButtonVisible(e);
 						}}
 					/>
 					{argentButton ? null : (
@@ -434,21 +409,16 @@ function CaisseForm() {
 							onClick={(e) => {
 								setArgentNumber(Number(e.target.value));
 								//enableInput(e);
-								makeButtonInvisible(e);
 							}}
 						>
 							Modifier
 						</Button>
 					)}
-				</Container>
+				</CustomInputContainer>
 			</div>
 			<div>
 				<Typography>TPV</Typography>
-				<Container
-					sx={{
-						padding: "1em",
-					}}
-				>
+				<CustomInputContainer>
 					<TextField
 						//error
 						//disabled={tpv}
@@ -462,7 +432,6 @@ function CaisseForm() {
 							updateTotal();
 							//setTpvNumber(Number(e.target.value));
 							// disableInput(e);
-							// makeButtonVisible(e);
 						}}
 						//defaultValue="Ventes"
 						//helperText="Incorrect entry."
@@ -474,7 +443,6 @@ function CaisseForm() {
 								//removeNumber(e);
 								setTpvNumber(Number(e.target.value));
 								//enableInput(e);
-								makeButtonInvisible(e);
 							}}
 						>
 							Modifier ventes
@@ -495,245 +463,263 @@ function CaisseForm() {
 							updateTotalTips();
 							//setTpvNumber(Number(e.target.value));
 							// disableInput(e);
-							// makeButtonVisible(e);
 						}}
 					/>
-				</Container>
+				</CustomInputContainer>
 			</div>
-			<div>
-				<Typography>Wix</Typography>
-				<Container
-					sx={{
-						padding: "1em",
-					}}
-				>
-					<TextField
-						//error
-						//disabled={wixInput}
-						id="wix"
-						label="Wix / Ventes"
-						type="number"
-						//defaultValue="Ventes"
-						//variant="filled"
-						onChange={(e) => {
-							setWixNumber(Number(e.target.value));
-						}}
-						onBlur={(e) => {
-							updateTotal();
-							// disableInput(e);
-							// makeButtonVisible(e);
-						}}
-					/>
-					<TextField
-						//error
-						id="filled-error-helper-text"
-						label="Wix / Tips"
-						type="number"
-						//defaultValue="Tips"
-						//helperText="Incorrect entry."
-						//variant="filled"
-						onChange={(e) => {
-							setWixTips(Number(e.target.value));
-						}}
-						onBlur={(e) => {
-							updateTotalTips();
-						}}
-					/>
-					{wixButton ? null : (
-						<CustomButton
-							id="wix_modify"
-							onClick={(e) => {
-								//removeNumber(e);
+			{activeRestaurant === "ficelle" ||
+			activeRestaurant === "yobatta" ? null : (
+				<div>
+					<Typography>Wix</Typography>
+					<CustomInputContainer
+					// sx={{
+					// 	padding: "1em",
+					// }}
+					>
+						<TextField
+							//error
+							//disabled={wixInput}
+							id="wix"
+							label="Wix / Ventes"
+							type="number"
+							//defaultValue="Ventes"
+							//variant="filled"
+							onChange={(e) => {
 								setWixNumber(Number(e.target.value));
-								//enableInput(e);
-								makeButtonInvisible(e);
 							}}
-						>
-							Modifier
-						</CustomButton>
-					)}
-				</Container>
-			</div>
-			<div>
-				<Typography>Uber</Typography>
-				<Container
-					sx={{
-						padding: "1em",
-					}}
-				>
-					<TextField
-						//error
-						//disabled={uberInput}
-						id="uber"
-						label="Uber / Ventes"
-						type="number"
-						//defaultValue="Hello World"
-						//variant="standard"
-						onChange={(e) => {
-							setUberNumber(Number(e.target.value));
-						}}
-						onBlur={(e) => {
-							updateTotal();
-							// disableInput(e);
-							// makeButtonVisible(e);
-						}}
-					/>
-					<TextField
-						//error
-						id="standard-error-helper-text"
-						label="Uber / Tips"
-						type="number"
-						//helperText="Incorrect entry."
-						//variant="standard"
-						onChange={(e) => {
-							setUberTips(Number(e.target.value));
-						}}
-						onBlur={(e) => {
-							updateTotalTips();
-						}}
-					/>
-					{uberButton ? null : (
-						<CustomButton
-							id="uber_modify"
-							onClick={(e) => {
+							onBlur={(e) => {
+								updateTotal();
+								// disableInput(e);
+							}}
+						/>
+						<TextField
+							//error
+							id="filled-error-helper-text"
+							label="Wix / Tips"
+							type="number"
+							//defaultValue="Tips"
+							//helperText="Incorrect entry."
+							//variant="filled"
+							onChange={(e) => {
+								setWixTips(Number(e.target.value));
+							}}
+							onBlur={(e) => {
+								updateTotalTips();
+							}}
+						/>
+						{wixButton ? null : (
+							<CustomButton
+								id="wix_modify"
+								onClick={(e) => {
+									//removeNumber(e);
+									setWixNumber(Number(e.target.value));
+									//enableInput(e);
+								}}
+							>
+								Modifier
+							</CustomButton>
+						)}
+					</CustomInputContainer>
+				</div>
+			)}
+			{activeRestaurant === "yobatta" ? null : (
+				<div>
+					<Typography>Uber</Typography>
+					<CustomInputContainer
+					// sx={{
+					// 	padding: "1em",
+					// }}
+					>
+						<TextField
+							//error
+							//disabled={uberInput}
+							id="uber"
+							label="Uber / Ventes"
+							type="number"
+							//defaultValue="Hello World"
+							//variant="standard"
+							onChange={(e) => {
 								setUberNumber(Number(e.target.value));
-								//enableInput(e);
-								makeButtonInvisible(e);
 							}}
-						>
-							Modifier
-						</CustomButton>
-					)}
-				</Container>
-			</div>
-			<div>
-				<Typography>Doordash</Typography>
-				<Container
-					sx={{
-						padding: "1em",
-					}}
-				>
-					{/* <div> */}
-					<TextField
-						//error
-						//disabled={doordashInput}
-						id="doordash"
-						label="Doordash / Ventes"
-						type="number"
-						onChange={(e) => {
-							setDoordashNumber(Number(e.target.value));
-						}}
-						onBlur={(e) => {
-							updateTotal();
-							// disableInput(e);
-							// makeButtonVisible(e);
-						}}
-					/>
-					{doordashButton ? null : (
-						<CustomButton
-							id="doordash_modify"
-							onClick={(e) => {
+							onBlur={(e) => {
+								updateTotal();
+								// disableInput(e);
+							}}
+						/>
+						<TextField
+							//error
+							id="standard-error-helper-text"
+							label="Uber / Tips"
+							type="number"
+							//helperText="Incorrect entry."
+							//variant="standard"
+							onChange={(e) => {
+								setUberTips(Number(e.target.value));
+							}}
+							onBlur={(e) => {
+								updateTotalTips();
+							}}
+						/>
+						{/* {uberButton ? null : (
+							<CustomButton
+								id="uber_modify"
+								onClick={(e) => {
+									setUberNumber(Number(e.target.value));
+									//enableInput(e);
+								}}
+							>
+								Modifier
+							</CustomButton>
+						)} */}
+					</CustomInputContainer>
+				</div>
+			)}
+			{activeRestaurant === "yobatta" ? null : (
+				<div>
+					<Typography>Doordash</Typography>
+					<CustomInputContainer
+					// sx={{
+					// 	padding: "1em",
+					// 	textAlign: "center",
+					// }}
+					>
+						{/* <div> */}
+						<TextField
+							//error
+							//disabled={doordashInput}
+							id="doordash"
+							label="Doordash / Ventes"
+							type="number"
+							onChange={(e) => {
 								setDoordashNumber(Number(e.target.value));
-								//enableInput(e);
-								makeButtonInvisible(e);
 							}}
-						>
-							Modifier
-						</CustomButton>
-					)}
-					{/* </div> */}
-					<TextField
-						//error
-						id="standard-error-helper-text"
-						label="Doordash / Tips"
-						type="number"
-						onChange={(e) => {
-							setDoordashTips(Number(e.target.value));
-						}}
-						onBlur={(e) => {
-							updateTotalTips();
-						}}
-					/>
-				</Container>
-			</div>
-			<div>
-				<Typography>Resto Loco</Typography>
-				{/* <div> */}
-				<Container
-					sx={{
-						padding: "1em",
-					}}
-				>
-					<TextField
-						//error
-						//disabled={restoInput}
-						id="resto"
-						label="Resto Loco / Ventes"
-						type="number"
-						onChange={(e) => {
-							setRestoNumber(Number(e.target.value));
-						}}
-						onBlur={(e) => {
-							updateTotal();
-							// disableInput(e);
-							// makeButtonVisible(e);
-						}}
-					/>
-
-					{restoButton ? null : (
-						<CustomButton
-							// <CustomButton
-							id="resto_modify"
-							onClick={(e) => {
+							onBlur={(e) => {
+								updateTotal();
+								// disableInput(e);
+							}}
+						/>
+						{/* {doordashButton ? null : (
+							<CustomButton
+								id="doordash_modify"
+								onClick={(e) => {
+									setDoordashNumber(Number(e.target.value));
+									//enableInput(e);
+								}}
+							>
+								Modifier
+							</CustomButton>
+						)} */}
+						{/* </div> */}
+						<TextField
+							//error
+							id="standard-error-helper-text"
+							label="Doordash / Tips"
+							type="number"
+							onChange={(e) => {
+								setDoordashTips(Number(e.target.value));
+							}}
+							onBlur={(e) => {
+								updateTotalTips();
+							}}
+						/>
+					</CustomInputContainer>
+				</div>
+			)}
+			{activeRestaurant === "ficelle" ||
+			activeRestaurant === "yobatta" ? null : (
+				<div>
+					<Typography>Resto Loco</Typography>
+					<CustomInputContainer>
+						<TextField
+							//error
+							//disabled={restoInput}
+							id="resto"
+							label="Resto Loco / Ventes"
+							type="number"
+							onChange={(e) => {
 								setRestoNumber(Number(e.target.value));
-								//enableInput(e);
-								makeButtonInvisible(e);
 							}}
-						>
-							Modifier
-						</CustomButton>
-					)}
-					{/* </div> */}
-					<TextField
-						//error
-						id="standard-error-helper-text"
-						label="Resto Loco / Tips"
-						type="number"
-						onChange={(e) => {
-							setRestoTips(Number(e.target.value));
-						}}
-						onBlur={(e) => {
-							updateTotalTips();
-						}}
-					/>
-				</Container>
-			</div>
-			{/* <div> */}
+							onBlur={(e) => {
+								updateTotal();
+								// disableInput(e);
+							}}
+						/>
+
+						{/* {restoButton ? null : (
+							<CustomButton
+								// <CustomButton
+								id="resto_modify"
+								onClick={(e) => {
+									setRestoNumber(Number(e.target.value));
+									//enableInput(e);
+								}}
+							>
+								Modifier
+							</CustomButton>
+						)} */}
+						{/* </div> */}
+						<TextField
+							//error
+							id="standard-error-helper-text"
+							label="Resto Loco / Tips"
+							type="number"
+							onChange={(e) => {
+								setRestoTips(Number(e.target.value));
+							}}
+							onBlur={(e) => {
+								updateTotalTips();
+							}}
+						/>
+					</CustomInputContainer>
+				</div>
+			)}
 			<Container
 				sx={{
-					position: "fixed",
-					right: "10%",
-					top: "50%",
-					width: "fit-content",
+					display: "flex",
+					justifyContent: "space-around",
+					alignItems: "center",
+					margin: "1em auto",
 				}}
 			>
 				<Typography
 					sx={{
-						fontSize: "2em",
+						fontSize: "1.3em",
 					}}
 				>
-					Total ventes: {total}$
+					Total ventes: {totalToDisplay}$
 				</Typography>
 				<Typography
 					sx={{
-						fontSize: "2em",
+						fontSize: "1.3em",
+					}}
+				>
+					Total ventes HT: {total}$
+				</Typography>
+				<Typography
+					sx={{
+						fontSize: "1.3em",
 					}}
 				>
 					Total tips: {totalTips}$
 				</Typography>
 			</Container>
-			{/* </div> */}
-			<Button type="submit">Envoyer</Button>
+			<Button
+				sx={{
+					left: "50%",
+					transform: "translateX(-50%)",
+					fontSize: "1.2em",
+					boxShadow: 1,
+					margin: "2em auto",
+					background: colorTheme,
+					color: "#fff",
+					"&:hover": {
+						color: colorTheme,
+					},
+				}}
+				type="submit"
+			>
+				Envoyer
+			</Button>
 		</Box>
 	);
 }

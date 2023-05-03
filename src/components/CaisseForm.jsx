@@ -78,9 +78,9 @@ function CaisseForm() {
 	const [argentButton, setArgentButton] = useState(true);
 	const [tpvButton, setTpvButton] = useState(true);
 	const [wixButton, setWixButton] = useState(true);
-	const [uberButton, setUberButton] = useState(true);
-	const [doordashButton, setDoordashButton] = useState(true);
-	const [restoButton, setRestoButton] = useState(true);
+	// const [uberButton, setUberButton] = useState(true);
+	// const [doordashButton, setDoordashButton] = useState(true);
+	// const [restoButton, setRestoButton] = useState(true);
 
 	const removeTaxes = (amount) => {
 		return amount - amount * (15 / 100);
@@ -339,16 +339,6 @@ function CaisseForm() {
 		if (error) {
 			return "Selectionner une date";
 		}
-		// switch (error) {
-		//   case 'maxDate':
-		//   case 'minDate': {
-		// 	return 'Please select a date in the first quarter of 2022';
-		//   }
-
-		//   default: {
-		// 	return '';
-		//   }
-		//}
 	}, [error]);
 	return (
 		<Box

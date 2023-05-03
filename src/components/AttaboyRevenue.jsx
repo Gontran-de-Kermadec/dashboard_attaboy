@@ -56,22 +56,9 @@ function AttaboyRevenue() {
 
 	console.log(revenueWeeksBefore);
 
-	// const reformattedArray = blabla.map(({ key, value }) => [key]);
-
-	// const label = [];
-	// blabla.forEach((x) => {
-	// 	console.log(x[0]);
-	// 	label.push(x[0]);
-	// 	//setLabels((prev) => [...prev, x[0]]);
-	// });
-	// console.log(label);
-	// setLabels(label);
-	// //}
-	// console.log(labels);
-	//}
 	useEffect(() => {
 		if (data) {
-			//console.log(data);
+			console.log(data);
 			console.log("manipulez moi");
 			const formattedDataArray = Object.entries(data);
 			const label = formattedDataArray.map((array) => {
@@ -95,8 +82,6 @@ function AttaboyRevenue() {
 		setRevenueWeeksBefore([]);
 		const date = new Date();
 		let startDate;
-		// let lastWeek;
-		// let lastWeekEnd;
 		const currentYear = new Date().getFullYear();
 		const todayDate = new Date(
 			date.getFullYear(),
@@ -108,32 +93,10 @@ function AttaboyRevenue() {
 		const week = Math.ceil((date.getDay() + 1 + days) / 7);
 		console.log(week);
 
-		//let aaa = [];
-
 		if (activePeriod === "annee") {
 			startDate = new Date(currentYear, 0, 1); //current year
-			// lastWeek = new Date(
-			// 	date.getFullYear(),
-			// 	date.getMonth(),
-			// 	date.getDate() - 14
-			// );
-			// lastWeekEnd = new Date(
-			// 	date.getFullYear(),
-			// 	date.getMonth(),
-			// 	date.getDate() - 8
-			// );
 		} else if (activePeriod === "mois") {
 			startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
-			// lastWeek = new Date(
-			// 	date.getFullYear(),
-			// 	date.getMonth(),
-			// 	date.getDate() - 14
-			// );
-			// lastWeekEnd = new Date(
-			// 	date.getFullYear(),
-			// 	date.getMonth(),
-			// 	date.getDate() - 8
-			// );
 		} else if (activePeriod === "semaine") {
 			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
 			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
@@ -141,18 +104,6 @@ function AttaboyRevenue() {
 			todayDate === startDate
 				? (startDate = todayDate)
 				: (startDate = midnightDate);
-
-			// lastWeek = new Date(date.setDate(date.getDate() - date.getDay()));
-			// lastWeek = new Date(
-			// 	date.getFullYear(),
-			// 	date.getMonth(),
-			// 	date.getDate() - 14
-			// );
-			// lastWeekEnd = new Date(
-			// 	date.getFullYear(),
-			// 	date.getMonth(),
-			// 	date.getDate() - 8
-			// );
 
 			const previousWeekStart = (x) => {
 				let substractor = x * 7;

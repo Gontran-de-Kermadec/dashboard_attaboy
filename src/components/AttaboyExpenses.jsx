@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Container, Typography } from "@mui/material";
+import React, { useEffect, useState, useContext } from "react";
+import { Container, Divider, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -9,6 +9,35 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpenseForm from "./ExpenseForm";
+import { BarRevenue } from "../components/charts/BarChart";
+import PieChart from "../components/charts/PieChart";
+
+import { RestaurantContext, ThemeContext, PeriodContext } from "../App";
+//firebase - firestore
+import { db } from "../firebaseConfig";
+import {
+	// doc,
+	// setDoc,
+	addDoc,
+	Timestamp,
+	// getDoc,
+	collection,
+	query,
+	where,
+	// getDocs,
+	onSnapshot,
+	// updateDoc,
+} from "firebase/firestore";
 
 const style = {
 	position: "absolute",
@@ -27,127 +56,337 @@ function AttaboyExpenses() {
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
 
-	const [type, setType] = useState("");
+	const [activeRestaurant] = useContext(RestaurantContext);
+	const [activePeriod] = useContext(PeriodContext);
+	const [colorTheme] = useContext(ThemeContext);
 
-	const handleChange = (event) => {
-		setType(event.target.value);
-	};
+	const [type, setType] = useState("");
+	const [totalSalary, setTotalSalary] = useState(0);
+	const [totalOrder, setTotalOrder] = useState(0);
+	const [totalOther, setTotalOther] = useState(0);
+	const [totalExpenses, setTotalExpenses] = useState(0);
+
+	const [salaryDetails, setSalaryDetails] = useState();
+	const [orderDetails, setOrderDetails] = useState();
+	const [otherDetails, setOtherDetails] = useState();
+
+	const [dataNumbers, setDataNumbers] = useState();
+
+	const dataLabel = ["salaires", "commandes", "autres"];
+	useEffect(() => {
+		const numbers = [totalSalary, totalOrder, totalOther];
+		setDataNumbers(numbers);
+	}, [totalOrder, totalOther, totalSalary]);
+
+	const currentYear = new Date().getFullYear();
+	useEffect(() => {
+		const date = new Date();
+		const todayDate = new Date(
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate()
+		);
+		let startDate;
+		let totalSalary = 0;
+		let salaryData = [];
+		if (activePeriod === "annee") {
+			startDate = new Date(currentYear, 0, 1); //current year
+		} else if (activePeriod === "mois") {
+			startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
+		} else if (activePeriod === "semaine") {
+			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
+			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
+
+			todayDate === startDate
+				? (startDate = todayDate)
+				: (startDate = midnightDate);
+			console.log(startDate);
+		}
+		const requestSalary = query(
+			//  collection(db, `depenses/${activeRestaurant}/${type}`),
+			collection(db, `depenses/${activeRestaurant}/Salaires`),
+			where("timestamp", ">=", startDate),
+			where("timestamp", "<=", todayDate)
+		);
+		onSnapshot(requestSalary, (querySnapshot) => {
+			console.log(querySnapshot);
+			querySnapshot.forEach((doc) => {
+				console.log(doc.data());
+				totalSalary += doc.data().total;
+				salaryData.push(doc.data());
+			});
+			setTotalSalary(totalSalary);
+			setSalaryDetails(salaryData);
+		});
+	}, [activeRestaurant, activePeriod, currentYear]);
+	useEffect(() => {
+		const date = new Date();
+		const todayDate = new Date(
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate()
+		);
+		let startDate;
+		let totalOrder = 0;
+		let orderData = [];
+		if (activePeriod === "annee") {
+			startDate = new Date(currentYear, 0, 1); //current year
+		} else if (activePeriod === "mois") {
+			startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
+		} else if (activePeriod === "semaine") {
+			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
+			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
+
+			todayDate === startDate
+				? (startDate = todayDate)
+				: (startDate = midnightDate);
+			console.log(startDate);
+		}
+		const requestOrder = query(
+			//  collection(db, `depenses/${activeRestaurant}/${type}`),
+			collection(db, `depenses/${activeRestaurant}/Commandes`),
+			where("timestamp", ">=", startDate),
+			where("timestamp", "<=", todayDate)
+		);
+		onSnapshot(requestOrder, (querySnapshot) => {
+			console.log(querySnapshot);
+			querySnapshot.forEach((doc) => {
+				console.log(doc.data());
+				totalOrder += doc.data().total;
+				orderData.push(doc.data());
+
+				// 	doordash: doordashTotal,
+				// 	restoLoco: restoLocoTotal,
+				// });
+			});
+			setTotalOrder(totalOrder);
+			setOrderDetails(orderData);
+		});
+	}, [activeRestaurant, activePeriod, currentYear]);
+	useEffect(() => {
+		const date = new Date();
+		const todayDate = new Date(
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate()
+		);
+		let startDate;
+		let totalOther = 0;
+		let otherData = [];
+
+		if (activePeriod === "annee") {
+			startDate = new Date(currentYear, 0, 1); //current year
+		} else if (activePeriod === "mois") {
+			startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
+		} else if (activePeriod === "semaine") {
+			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
+			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
+
+			todayDate === startDate
+				? (startDate = todayDate)
+				: (startDate = midnightDate);
+			console.log(startDate);
+		}
+		const requestOther = query(
+			//  collection(db, `depenses/${activeRestaurant}/${type}`),
+			collection(db, `depenses/${activeRestaurant}/Autres`),
+			where("timestamp", ">=", startDate),
+			where("timestamp", "<=", todayDate)
+		);
+		onSnapshot(requestOther, (querySnapshot) => {
+			console.log(querySnapshot);
+			querySnapshot.forEach((doc) => {
+				console.log(doc.data());
+				totalOther += doc.data().total;
+				otherData.push(doc.data());
+			});
+			setTotalOther(totalOther);
+			setOtherDetails(otherData);
+		});
+	}, [activePeriod, activeRestaurant, currentYear]);
+	// const handleSubmit = async (e) => {
+	// 	e.preventDefault();
+	// 	const checkingrequest = query(
+	// 		collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
+	// 		where("timestamp", "==", selectedDate)
+	// 	);
+	// 	const querySnapshot = await getDocs(checkingrequest);
+	// 	console.log(querySnapshot.empty);
+	// 	if (querySnapshot.empty) {
+	// 		console.log("create");
+	// 		const userDoc = await addDoc(
+	// 			collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
+	// 			salesSummary
+	// 		);
+	// 		console.log("Document written with ID: " + userDoc.id);
+	// 	} else {
+	// 		console.log("update");
+	// 		querySnapshot.forEach((document) => {
+	// 			// doc.data() is never undefined for query doc snapshots
+	// 			console.log(document.id, " => ", document.data());
+	// 			const ref = collection(
+	// 				db,
+	// 				`ventes/${activeRestaurant}/${selectedYear}`
+	// 			);
+	// 			const docRef = doc(ref, document.id);
+	// 			// updateDoc(
+	// 			// 	collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
+	// 			// 	salesSummary
+	// 			// );
+	// 			updateDoc(docRef, salesSummary);
+	// 		});
+	// 	}
+	// };
+	useEffect(() => {
+		const sumOfExpenses = totalOther + totalOrder + totalSalary;
+		setTotalExpenses(sumOfExpenses);
+	}, [totalOrder, totalOther, totalSalary]);
+	// const handleChange = (event) => {
+	// 	setType(event.target.value);
+	// };
+	console.log(salaryDetails);
 	return (
-		<div>
-			<Button onClick={handleOpen}>Ajouter une dépense</Button>
+		<Box>
+			<Button
+				onClick={handleOpen}
+				sx={{
+					left: "50%",
+					transform: "translateX(-50%)",
+					background: colorTheme,
+					boxShadow: 2,
+					fontSize: "1.2em",
+					color: "#fff",
+					margin: "2em auto",
+					"&:hover": {
+						color: colorTheme,
+					},
+				}}
+			>
+				Ajouter une dépense
+			</Button>
 			<Modal
 				open={open}
 				onClose={handleClose}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				{/* <Container> */}
-
-				<Box sx={style}>
-					<Typography
-						variant="h6"
-						sx={{
-							textAlign: "center",
-						}}
-					>
-						Remplir le formulaire
-					</Typography>
-					<Box
-						sx={{
-							width: "30vw",
-							margin: "1em auto",
-						}}
-					>
-						<DateSelection />
-					</Box>
-					<Box
-						sx={{
-							width: "30vw",
-							margin: "1em auto",
-						}}
-					>
-						<FormControl fullWidth>
-							<InputLabel id="demo-simple-select-label">Type</InputLabel>
-							<Select
-								labelId="demo-simple-select-label"
-								id="demo-simple-select"
-								value={type}
-								label="Age"
-								onChange={handleChange}
-							>
-								<MenuItem value="Salaires">Salaires</MenuItem>
-								<MenuItem value="Commandes">Commandes</MenuItem>
-								<MenuItem value="Autre">Autre</MenuItem>
-							</Select>
-						</FormControl>
-					</Box>
-					{type === "Autre" ? (
-						<Box
-							sx={{
-								width: "30vw",
-								margin: "1em auto",
-							}}
-						>
-							<TextField
-								id="outlined-multiline-flexible"
-								label="Remarque"
-								multiline
-								maxRows={4}
-								sx={{
-									width: "100%",
-								}}
-							/>
-						</Box>
-					) : null}
-					<Box
-						sx={{
-							width: "20vw",
-							margin: "1em auto",
-						}}
-					>
-						<TextField
-							//error
-							id="tpv_tips"
-							label="Montant"
-							type="number"
-							//defaultValue="Tips"
-							//helperText="Incorrect entry."
-							// onChange={(e) => {
-							// 	setTpvTips(Number(e.target.value));
-							// }}
-							// onBlur={(e) => {
-							// 	updateTotalTips();
-							// 	//setTpvNumber(Number(e.target.value));
-							// 	// disableInput(e);
-							// }}
-						/>
-					</Box>
-					<Box
-						sx={{
-							textAlign: "center",
-						}}
-					>
-						<Button
-							// sx={{
-							// 	left: "50%",
-							// 	transform: "translateX(-50%)",
-							// 	fontSize: "1.2em",
-							// 	boxShadow: 1,
-							// 	margin: "2em auto",
-							// 	background: colorTheme,
-							// 	color: "#fff",
-							// 	"&:hover": {
-							// 		color: colorTheme,
-							// 	},
-							// }}
-							type="submit"
-						>
-							Envoyer
-						</Button>
-					</Box>
-				</Box>
+				<div>
+					<ExpenseForm />
+				</div>
 			</Modal>
-		</div>
+			<Container
+				sx={{
+					// textAlign: "center",
+					margin: "2em auto",
+				}}
+			>
+				<Typography variant="h5">
+					Total des dépenses: ${totalExpenses}
+				</Typography>
+				{/* <Typography>{totalExpenses}</Typography> */}
+			</Container>
+			<Container>
+				<Accordion>
+					<AccordionSummary
+						expandIcon={<ExpandMoreIcon />}
+						aria-controls="panel1a-content"
+						id="panel1a-header"
+					>
+						<Typography variant="h6">Salaires: ${totalSalary}</Typography>
+					</AccordionSummary>
+					<AccordionDetails>
+						{salaryDetails?.map((element, index) => {
+							return (
+								<List key={index}>
+									<ListItem>
+										<ListItemText>
+											{element.date}{" "}
+											{element.note !== "" ? "/ " + element.note : null} - $
+											{element.total}
+										</ListItemText>
+									</ListItem>
+									{/* <Typography>{element.total}</Typography> */}
+								</List>
+							);
+						})}
+					</AccordionDetails>
+				</Accordion>
+				{/* <Typography>Detail des salaires</Typography> */}
+				{/* {salaryDetails.map((element, index) => {
+					return (
+						<List key={index}>
+							<ListItem>
+								<ListItemText>
+									{element.date} ={">"} {element.total}
+								</ListItemText>
+							</ListItem>
+						</List>
+					);
+				})} */}
+			</Container>
+			<Container
+				sx={{
+					margin: "1em auto",
+				}}
+			>
+				<Accordion>
+					<AccordionSummary
+						expandIcon={<ExpandMoreIcon />}
+						aria-controls="panel1a-content"
+						id="panel1a-header"
+					>
+						<Typography variant="h6">Commandes: ${totalOrder}</Typography>
+					</AccordionSummary>
+					<AccordionDetails>
+						{orderDetails?.map((element, index) => {
+							return (
+								<List key={index}>
+									<ListItem>
+										<ListItemText>
+											{element.date}{" "}
+											{element.note !== "" ? "/ " + element.note : null} - $
+											{element.total}{" "}
+										</ListItemText>
+									</ListItem>
+									<Divider />
+								</List>
+							);
+						})}
+					</AccordionDetails>
+				</Accordion>
+			</Container>
+			<Container
+				sx={{
+					margin: "1em auto",
+				}}
+			>
+				<Accordion>
+					<AccordionSummary
+						expandIcon={<ExpandMoreIcon />}
+						aria-controls="panel1a-content"
+						id="panel1a-header"
+					>
+						<Typography variant="h6">Autres dépenses: ${totalOther}</Typography>
+					</AccordionSummary>
+					<AccordionDetails>
+						{otherDetails?.map((element, index) => {
+							return (
+								<List key={index}>
+									<ListItem>
+										<ListItemText>
+											{element.date} / {element.note} - ${element.total}
+										</ListItemText>
+									</ListItem>
+									<Divider />
+								</List>
+							);
+						})}
+					</AccordionDetails>
+				</Accordion>
+			</Container>
+			<BarRevenue dataLabel={dataLabel} dataNumbers={dataNumbers} />
+			<PieChart dataLabel={dataLabel} dataNumbers={dataNumbers} />
+		</Box>
 	);
 }
 

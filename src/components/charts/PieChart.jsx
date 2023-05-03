@@ -15,6 +15,22 @@ function PieChart(props) {
 				display: true,
 				text: "Source CA",
 			},
+			tooltip: {
+				enabled: true,
+				callbacks: {
+					// part of the code to make percentage visible on chart
+					footer: (ttItem) => {
+						let sum = 0;
+						let dataArr = ttItem[0].dataset.data;
+						dataArr.map((data) => {
+							return (sum += Number(data));
+						});
+
+						let percentage = ((ttItem[0].parsed * 100) / sum).toFixed(2) + "%";
+						return `${percentage}`;
+					},
+				},
+			},
 		},
 	};
 	const data = {
@@ -49,7 +65,6 @@ function PieChart(props) {
 	return (
 		<Doughnut data={data} width={400} height={400} options={chartOptions} />
 	);
-	// return <Doughnut data={data} options={{ cutout: "80%" }} />;
 }
 
 export default PieChart;

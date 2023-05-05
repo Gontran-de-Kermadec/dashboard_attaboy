@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Revenus from "./pages/Revenus";
 import { createContext, useState, useEffect } from "react";
 import Depenses from "./pages/Depenses";
+import Employes from "./pages/Employes";
 
 export const PeriodContext = createContext();
 export const RestaurantContext = createContext();
@@ -54,6 +55,7 @@ function App() {
 							<Route path="/revenus" element={<Revenus />} />
 							<Route path="/caisse" element={<Caisse />} />
 							<Route path="/depenses" element={<Depenses />} />
+							<Route path="/employes" element={<Employes />} />
 						</Routes>
 					</PeriodContext.Provider>
 				</ThemeContext.Provider>

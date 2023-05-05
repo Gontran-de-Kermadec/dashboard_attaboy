@@ -91,8 +91,8 @@ function Sidebar() {
 			section: ["Caisse", "Revenus", "Depenses"],
 		},
 		{
-			title: "Employés",
-			section: ["Planning", "Salaires"],
+			title: "Personnel",
+			section: ["Employes", "Planning", "Salaires"],
 		},
 	];
 	// const navigate = useNavigate();

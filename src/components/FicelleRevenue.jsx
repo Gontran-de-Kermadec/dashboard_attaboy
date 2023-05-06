@@ -127,11 +127,7 @@ function FicelleRevenue() {
 				{/* <Item>
 					<StyledTypo>WIX</StyledTypo>
 					<StyledTypo>$ {wixRevenue}</StyledTypo>
-				</Item>
-				<Item>
-					<StyledTypo>RESTO LOCO</StyledTypo>
-					<StyledTypo>$ {restoLocoRevenue}</StyledTypo>
-				</Item> */}
+			</Item>*/}
 				<Item>
 					<StyledTypo>UBER</StyledTypo>
 					<StyledTypo>$ {uberRevenue}</StyledTypo>

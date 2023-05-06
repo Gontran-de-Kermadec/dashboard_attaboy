@@ -271,7 +271,7 @@ function AttaboyExpenses() {
 				aria-describedby="modal-modal-description"
 			>
 				<div>
-					<ExpenseForm />
+					<ExpenseForm handleClose={handleClose} />
 				</div>
 			</Modal>
 			<Container

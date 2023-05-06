@@ -124,7 +124,7 @@ function Employes() {
 						aria-describedby="modal-modal-description"
 					>
 						<div>
-							<EmployeeForm />
+							<EmployeeForm handleClose={handleClose} />
 						</div>
 					</Modal>
 					<Typography>

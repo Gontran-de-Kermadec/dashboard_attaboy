@@ -42,7 +42,7 @@ const style = {
 	p: 4,
 };
 
-function ExpenseForm() {
+function ExpenseForm({ handleClose }) {
 	const [open, setOpen] = useState(false);
 	// const handleOpen = () => setOpen(true);
 	// const handleClose = () => setOpen(false);
@@ -53,6 +53,7 @@ function ExpenseForm() {
 	const [note, setNote] = useState("");
 
 	const [activeRestaurant] = useContext(RestaurantContext);
+	const [colorTheme] = useContext(ThemeContext);
 
 	const expenseSummary = {
 		date: date,
@@ -99,23 +100,7 @@ function ExpenseForm() {
 			expenseSummary
 		);
 		console.log("Document written with ID: " + userDoc.id);
-		// } else {
-		// 	console.log("update");
-		// 	querySnapshot.forEach((document) => {
-		// 		// doc.data() is never undefined for query doc snapshots
-		// 		console.log(document.id, " => ", document.data());
-		// 		const ref = collection(
-		// 			db,
-		// 			`ventes/${activeRestaurant}/${selectedYear}`
-		// 		);
-		// 		const docRef = doc(ref, document.id);
-		// 		// updateDoc(
-		// 		// 	collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
-		// 		// 	salesSummary
-		// 		// );
-		// 		updateDoc(docRef, salesSummary);
-		// 	});
-		// }
+		handleClose();
 	};
 	const handleChange = (event) => {
 		setType(event.target.value);
@@ -126,7 +111,7 @@ function ExpenseForm() {
 			component="form"
 			sx={{
 				padding: "1em",
-				"& .MuiTextField-root": { m: 1, width: "25ch" },
+				"& .MuiTextField-root": { width: "100%" },
 			}}
 			noValidate
 			autoComplete="off"
@@ -192,7 +177,6 @@ function ExpenseForm() {
 						</Select>
 					</FormControl>
 				</Box>
-
 				<Box
 					sx={{
 						width: "20em",
@@ -207,15 +191,13 @@ function ExpenseForm() {
 						onChange={(e) => {
 							setNote(e.target.value);
 						}}
-						sx={{
-							width: "100%",
-						}}
 					/>
 				</Box>
 				<Box
 					sx={{
-						width: "15vw",
+						width: "20vw",
 						margin: "1em auto",
+						textAlign: "center",
 					}}
 				>
 					<TextField
@@ -223,7 +205,6 @@ function ExpenseForm() {
 						id="tpv_tips"
 						label="Montant"
 						type="number"
-						//defaultValue="Tips"
 						//helperText="Incorrect entry."
 						onChange={(e) => {
 							setAmount(Number(e.target.value));
@@ -233,9 +214,9 @@ function ExpenseForm() {
 						// 	//setTpvNumber(Number(e.target.value));
 						// 	// disableInput(e);
 						// }}
-						sx={{
-							width: "100%",
-						}}
+						// sx={{
+						// 	width: "100%",
+						// }}
 					/>
 				</Box>
 				<Box
@@ -243,7 +224,20 @@ function ExpenseForm() {
 						textAlign: "center",
 					}}
 				>
-					<Button type="submit">Envoyer</Button>
+					<Button
+						type="submit"
+						sx={{
+							background: colorTheme,
+							color: "#fff",
+							fontSize: "1.2em",
+							"&:hover": {
+								color: colorTheme,
+								background: "#fff",
+							},
+						}}
+					>
+						Envoyer
+					</Button>
 				</Box>
 			</Box>
 		</Box>

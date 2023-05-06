@@ -44,7 +44,7 @@ const style = {
 	p: 4,
 };
 
-function EmployeeForm() {
+function EmployeeForm({ handleClose }) {
 	const [colorTheme] = useContext(ThemeContext);
 	const [activeRestaurant] = useContext(RestaurantContext);
 	const [activeStep, setActiveStep] = useState(1);
@@ -107,6 +107,7 @@ function EmployeeForm() {
 			employeeDetails
 		);
 		console.log("Document written with ID: " + userDoc.id);
+		handleClose();
 	};
 	const getSelectedDate = (e) => {
 		let day = e.$d.getDate();

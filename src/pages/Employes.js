@@ -2,17 +2,19 @@ import React, { useContext, useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { db } from "../firebaseConfig";
 import {
-	// doc,
+	doc,
 	// setDoc,
 	// addDoc,
 	// Timestamp,
-	// getDoc,
+	getDoc,
 	collection,
 	query,
 	// where,
 	// getDocs,
 	onSnapshot,
 	// updateDoc,
+	// deleteDoc
+	deleteDoc,
 } from "firebase/firestore";
 //Material ui
 import Box from "@mui/material/Box";
@@ -40,11 +42,18 @@ function Employes() {
 	const [activeEmployee, setActiveEmployee] = useState();
 	const [employeesDatas, setEmployeesDatas] = useState([]);
 
+	const [currentField, setCurrentField] = useState("");
+	const [parentToElement, setParentToElement] = useState("");
+	const [userId, setUserId] = useState();
 	const [open, setOpen] = useState(false);
 	const handleOpen = () => setOpen(true);
 	const handleClose = () => setOpen(false);
 	const [openDelete, setOpenDelete] = useState(false);
-	const handleOpenDelete = () => setOpenDelete(true);
+	const handleOpenDelete = (id) => {
+		console.log(id);
+		setUserId(id);
+		setOpenDelete(true);
+	};
 	const handleCloseDelete = () => setOpenDelete(false);
 
 	// const CardTitle = styled(Typography)(({ theme }) => ({
@@ -59,25 +68,29 @@ function Employes() {
 			color: colorTheme,
 		},
 	}));
-
+	const handleDeleteEmployee = async () => {
+		await deleteDoc(doc(db, `personnel/${activeRestaurant}/salarie/${userId}`));
+		setOpenDelete(false);
+	};
 	useEffect(() => {
 		const request = query(
-			//collection(db, `ventes/attaboy/${currentYear}`),
 			collection(db, `personnel/${activeRestaurant}/salarie`)
 			// where("timestamp", ">=", startDate),
 			// where("timestamp", "<=", todayDate)
 		);
 		console.log(request);
 		let dataToDisplay = [];
+		let dataWithDocId;
 		onSnapshot(request, (querySnapshot) => {
 			querySnapshot.forEach((doc) => {
-				console.log(doc.data());
-				dataToDisplay.push(doc.data());
+				console.log(doc.id);
+				dataWithDocId = doc.data();
+				dataWithDocId.documentId = doc.id;
+				dataToDisplay.push(dataWithDocId);
 			});
 			setEmployeesDatas(dataToDisplay);
 		});
 	}, [activeRestaurant]);
-	console.log(employeesDatas);
 	return (
 		<>
 			<div className="flex">
@@ -127,6 +140,7 @@ function Employes() {
 							{employeesDatas?.map((employee) => {
 								return (
 									<Typography
+										key={employee.documentId}
 										onClick={() =>
 											setActiveEmployee(employee.personnal_infos.lastName)
 										}
@@ -152,10 +166,8 @@ function Employes() {
 									return activeEmployee ===
 										employee.personnal_infos.lastName ? (
 										<Container
+											key={employee.documentId}
 											sx={{
-												// position: "absolute",
-												// right: "0",
-												// top: "-50%",
 												width: "80%",
 												boxShadow: 2,
 												padding: "1em",
@@ -176,6 +188,7 @@ function Employes() {
 													<SpanItem component="span">Nom : </SpanItem>
 													{employee.personnal_infos.lastName}
 												</Typography>
+
 												<Typography>
 													<SpanItem component="span">Prénom : </SpanItem>{" "}
 													{employee.personnal_infos.firstName}
@@ -247,15 +260,15 @@ function Employes() {
 											</Box>
 											<Box
 												sx={{
-													display: "flex",
-													justifyContent: "space-around",
 													marginTop: "1em",
+													textAlign: "center",
 												}}
 											>
-												<CardButton onClick={handleOpenDelete}>
+												<CardButton
+													onClick={() => handleOpenDelete(employee.documentId)}
+												>
 													Supprimer {employee.personnal_infos.firstName}
 												</CardButton>
-												<CardButton onClick={handleOpen}>Modifer</CardButton>
 											</Box>
 										</Container>
 									) : null;
@@ -270,10 +283,49 @@ function Employes() {
 						aria-describedby="modal-modal-description"
 					>
 						<Box sx={style}>
-							<Typography>C'est sûr !?</Typography>
-							<Box>
-								<Button>Oui</Button>
-								<Button onClick={handleCloseDelete}>Non</Button>
+							<Typography
+								sx={{
+									textAlign: "center",
+									fontSize: "2em",
+								}}
+							>
+								C'est sûr !?
+							</Typography>
+							<Box
+								sx={{
+									display: "flex",
+									justifyContent: "space-around",
+									marginTop: "2em",
+								}}
+							>
+								<Button
+									onClick={handleDeleteEmployee}
+									sx={{
+										fontSize: "1.2em",
+										background: colorTheme,
+										color: "#fff",
+										"&:hover": {
+											background: "#fff",
+											color: colorTheme,
+										},
+									}}
+								>
+									Oui
+								</Button>
+								<Button
+									onClick={handleCloseDelete}
+									sx={{
+										fontSize: "1.2em",
+										background: colorTheme,
+										color: "#fff",
+										"&:hover": {
+											background: "#fff",
+											color: colorTheme,
+										},
+									}}
+								>
+									Non
+								</Button>
 							</Box>
 						</Box>
 					</Modal>

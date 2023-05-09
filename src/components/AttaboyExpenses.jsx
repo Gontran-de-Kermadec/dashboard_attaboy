@@ -241,9 +241,7 @@ function AttaboyExpenses() {
 		const sumOfExpenses = totalOther + totalOrder + totalSalary;
 		setTotalExpenses(sumOfExpenses);
 	}, [totalOrder, totalOther, totalSalary]);
-	// const handleChange = (event) => {
-	// 	setType(event.target.value);
-	// };
+
 	console.log(salaryDetails);
 	return (
 		<Box>
@@ -283,7 +281,6 @@ function AttaboyExpenses() {
 				<Typography variant="h5">
 					Total des dépenses: ${totalExpenses}
 				</Typography>
-				{/* <Typography>{totalExpenses}</Typography> */}
 			</Container>
 			<Container>
 				<Accordion>
@@ -305,7 +302,6 @@ function AttaboyExpenses() {
 											{element.total}
 										</ListItemText>
 									</ListItem>
-									{/* <Typography>{element.total}</Typography> */}
 								</List>
 							);
 						})}

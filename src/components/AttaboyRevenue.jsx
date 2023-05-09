@@ -33,10 +33,13 @@ function AttaboyRevenue() {
 	const [doordashRevenue, setDoordashRevenue] = useState(0);
 	const [restoLocoRevenue, setRestoLocoRevenue] = useState(0);
 	const [allRevenue, setAllRevenue] = useState([]);
+	const [lastDailyRevenue, setLastDailyRevenue] = useState();
 
 	//weeks before
 	const [revenueWeeksBefore, setRevenueWeeksBefore] = useState([]);
+	const [revenueMonthsBefore, setRevenueMonthsBefore] = useState([]);
 	const [finalCount, setFinalCount] = useState([]);
+	const [finalMonthArray, setFinalMotnhArray] = useState([]);
 
 	const Item = styled(Paper)(({ theme }) => ({
 		textAlign: "center",
@@ -80,13 +83,20 @@ function AttaboyRevenue() {
 
 	useEffect(() => {
 		setRevenueWeeksBefore([]);
+		setRevenueMonthsBefore([]);
 		const date = new Date();
+		console.log(date.getDate() - 1);
 		let startDate;
 		const currentYear = new Date().getFullYear();
 		const todayDate = new Date(
 			date.getFullYear(),
 			date.getMonth(),
 			date.getDate()
+		);
+		const previousDay = new Date(
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate() - 1
 		);
 		const year = new Date(date.getFullYear(), 0, 1);
 		const days = Math.floor((date - year) / (24 * 60 * 60 * 1000));
@@ -97,6 +107,64 @@ function AttaboyRevenue() {
 			startDate = new Date(currentYear, 0, 1); //current year
 		} else if (activePeriod === "mois") {
 			startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
+
+			//variables to get month before
+			const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+			const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+			const previousMonthFirstDay = (x) => {
+				let substractor = x * 1;
+				let monthFirstDay = new Date(
+					date.getFullYear(),
+					date.getMonth() - substractor,
+					1
+					// date.getDate() - substractor
+				);
+				return monthFirstDay;
+			};
+			// const prevMonthFirstDate = new Date(
+			// 	date.getFullYear() - (date.getMonth() > 0 ? 0 : 1),
+			// 	(date.getMonth() - 1 + 12) % 12,
+			// 	1
+			// );
+			//console.log(prevMonthFirstDate);
+			console.log(previousMonthFirstDay(2));
+			const previousMonthLastDay = (x) => {
+				let substractor = x * 1 - 1;
+				let monthLastDay = new Date(
+					date.getFullYear(),
+					date.getMonth() - substractor,
+					0
+				);
+				return monthLastDay;
+			};
+			console.log(previousMonthLastDay(2));
+			const numberOfMonthBefore = 5;
+			for (let i = 1; i < numberOfMonthBefore; i++) {
+				const startMonth = previousMonthFirstDay(i);
+				const endMonth = previousMonthLastDay(i);
+				console.log(startMonth);
+				console.log(endMonth);
+				let totalMonthBefore = 0;
+				let randomDate;
+				const getMonthBefore = query(
+					collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+					where("timestamp", ">=", startMonth),
+					where("timestamp", "<=", endMonth)
+				);
+				onSnapshot(getMonthBefore, (querySnapshot) => {
+					querySnapshot.forEach((doc) => {
+						console.log(doc.data().total);
+						totalMonthBefore += doc.data().total;
+						randomDate = doc.data().date;
+					});
+					const testObject = {
+						date: randomDate,
+						total: totalMonthBefore,
+					};
+					console.log(testObject);
+					setRevenueMonthsBefore((prev) => [...prev, testObject]);
+				});
+			}
 		} else if (activePeriod === "semaine") {
 			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
 			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
@@ -105,6 +173,7 @@ function AttaboyRevenue() {
 				? (startDate = todayDate)
 				: (startDate = midnightDate);
 
+			// variables to get weeks before
 			const previousWeekStart = (x) => {
 				let substractor = x * 7;
 				let weekFirstDay = new Date(
@@ -123,8 +192,8 @@ function AttaboyRevenue() {
 				);
 				return weekLastDay;
 			};
-
-			for (let i = 1; i < 5; i++) {
+			const numberOfWeekBefore = 5;
+			for (let i = 1; i < numberOfWeekBefore; i++) {
 				const beginningWeek = previousWeekStart(i);
 				const weekEnding = previousWeekEnd(i);
 				// console.log(beginningWeek);
@@ -138,6 +207,7 @@ function AttaboyRevenue() {
 				);
 				onSnapshot(getWeekBefore, (querySnapshot) => {
 					querySnapshot.forEach((doc) => {
+						console.log(doc.data().total + " " + doc.data().date);
 						totalWeekBefore += doc.data().total;
 						randomDate = doc.data().date;
 					});
@@ -162,9 +232,10 @@ function AttaboyRevenue() {
 			where("timestamp", ">=", startDate),
 			where("timestamp", "<=", todayDate)
 		);
+		console.log(todayDate);
 		onSnapshot(q, (querySnapshot) => {
 			querySnapshot.forEach((doc) => {
-				//console.log(doc.data().sourcesOfRevenues);
+				console.log(doc.data().sourcesOfRevenues);
 				total += doc.data().total;
 				uberTotal += doc.data().sourcesOfRevenues.uber;
 				tpvTotal += doc.data().sourcesOfRevenues.tpv;
@@ -191,8 +262,50 @@ function AttaboyRevenue() {
 				restoLoco: restoLocoTotal,
 			});
 		});
+		// const lastDayRequest = query(
+		// 	collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+		// 	where("timestamp", "==", previousDay)
+		// );
+		// onSnapshot(lastDayRequest, (querySnapshot) => {
+		// 	if (querySnapshot.empty) {
+		// 		console.log("pas de revenus hier");
+		// 	} else {
+		// 		querySnapshot.forEach((doc) => {
+		// 			console.log(doc.data().sourcesOfRevenues);
+		// 			//total += doc.data().total;
+		// 		});
+		// 	}
+		// });
 	}, [activePeriod, activeRestaurant]);
-
+	useEffect(() => {
+		const date = new Date();
+		//console.log(date.getDate() - 1);
+		const currentYear = new Date().getFullYear();
+		const previousDay = new Date(
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate() - 1
+		);
+		const lastDayRequest = query(
+			collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+			where("timestamp", "==", previousDay)
+		);
+		let lastDayRevenue = 0;
+		console.log(lastDayRequest);
+		onSnapshot(lastDayRequest, (querySnapshot) => {
+			if (querySnapshot.empty) {
+				console.log("pas de revenus hier");
+				setLastDailyRevenue("Caisse pas faite");
+			} else {
+				querySnapshot.forEach((doc) => {
+					console.log(doc.data().sourcesOfRevenues);
+					lastDayRevenue = doc.data().total;
+				});
+				setLastDailyRevenue(lastDayRevenue);
+			}
+		});
+	}, [activeRestaurant]);
+	console.log(revenueMonthsBefore);
 	useEffect(() => {
 		if (revenueWeeksBefore) {
 			revenueWeeksBefore.reverse();
@@ -227,31 +340,84 @@ function AttaboyRevenue() {
 				const year = new Date(date.getFullYear(), 0, 1);
 				const days = Math.floor((date - year) / (24 * 60 * 60 * 1000));
 				const week = Math.ceil((date.getDay() + 1 + days) / 7);
-				//	console.log(week);
+				console.log(week);
 				const objToReturn = {
 					date: week,
 					total: element.total,
 				};
 				return objToReturn;
 			});
-			//const testAdd = findWeekNumber.map((el) => ({ ...el }));
 			const result = findWeekNumber.slice(1).map(({ date, total }, i) => ({
 				date,
 				total,
 				...variationArray[i],
 			}));
 			console.log(result);
-			// const newArr = [{ name: "eve" }, { name: "john" }, { name: "jane" }].map(
-			// 	(v) => ({ ...v, isActive: true })
-			// );
-
 			setFinalCount(result);
-			// setFinalCount(findWeekNumber);
 		} else {
 			console.log("pas da data");
 			return null;
 		}
 	}, [revenueWeeksBefore]);
+	useEffect(() => {
+		if (revenueMonthsBefore) {
+			console.log(revenueMonthsBefore);
+			revenueMonthsBefore.reverse();
+
+			//section pour afficher taux de variation
+			const variationArray = [];
+			const variation =
+				revenueMonthsBefore.length > 0
+					? revenueMonthsBefore.reduce((acc, curr) => {
+							console.log(acc.total, curr.total);
+							const x = Math.round(
+								((curr.total - acc.total) / acc.total) * 100
+							);
+							console.log("varia " + x);
+							const variationRate = {
+								variation: x,
+							};
+							variationArray.push(variationRate);
+							if (acc.total !== curr.total) {
+								console.log("ici");
+								acc.total = curr.total;
+							}
+							return acc;
+					  })
+					: null;
+			console.log(variation);
+			console.log(variationArray);
+
+			//	revenueWeeksBefore.map((x) => {
+			const findMonthName = revenueMonthsBefore.map((element) => {
+				const date = new Date(element.date);
+				// const year = new Date(date.getFullYear(), 0, 1);
+				// const days = Math.floor((date - year) / (24 * 60 * 60 * 1000));
+				// const week = Math.ceil((date.getDay() + 1 + days) / 7);
+				const month = date.toLocaleString("default", { month: "long" });
+				console.log(month);
+
+				const objToReturn = {
+					month: month === "Invalid Date" ? undefined : month,
+					total: element.total,
+				};
+				console.log(objToReturn);
+				return objToReturn;
+			});
+
+			const result = findMonthName.slice(1).map(({ month, total }, i) => ({
+				month,
+				total,
+				...variationArray[i],
+			}));
+			console.log(result);
+			setFinalMotnhArray(result);
+		} else {
+			console.log("pas da data");
+			return null;
+		}
+	}, [revenueMonthsBefore]);
+	console.log(finalMonthArray);
 	console.log(finalCount);
 	return (
 		<>
@@ -264,6 +430,17 @@ function AttaboyRevenue() {
 				Chiffres d'affaires :{" "}
 				<Typography variant="span" sx={{ color: colorTheme }}>
 					$ {revenue}
+				</Typography>
+			</Typography>
+			<Typography
+				sx={{
+					fontSize: "2em",
+					margin: "1em 0;",
+				}}
+			>
+				Chiffres d'affaires de la veille :{" "}
+				<Typography variant="span" sx={{ color: colorTheme }}>
+					$ {lastDailyRevenue}
 				</Typography>
 			</Typography>
 			<Box
@@ -324,10 +501,37 @@ function AttaboyRevenue() {
 				}}
 			>
 				{finalCount.map((value, i) => {
-					// {finalCount.slice(1).map((value, i) => {
 					return isNaN(value.date) ? null : (
 						<Item key={i}>
 							<Typography>Semaine : {value.date}</Typography>
+							<Typography>$ {value.total}</Typography>
+							{value.variation === Infinity ? (
+								<Typography>N.D</Typography>
+							) : (
+								<Typography
+									sx={{
+										color: value.variation > 0 ? "green" : "red",
+									}}
+								>
+									{value.variation}%
+								</Typography>
+							)}
+						</Item>
+					);
+				})}
+			</Box>
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "space-around",
+					// flexWrap: "wrap",
+				}}
+			>
+				{finalMonthArray.map((value, i) => {
+					// <Typography>{value.total}</Typography>;
+					return value.month === undefined ? null : (
+						<Item key={i}>
+							<Typography>{value.month}</Typography>
 							<Typography>$ {value.total}</Typography>
 							{value.variation === Infinity ? (
 								<Typography>N.D</Typography>

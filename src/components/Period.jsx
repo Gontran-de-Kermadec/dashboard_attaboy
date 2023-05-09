@@ -20,28 +20,7 @@ function Period() {
 		console.log(newPeriod);
 		setActivePeriod(newPeriod);
 	};
-	// useEffect(() => {
-	// 	const changeTheme = () => {
-	// 		switch (activeRestaurant) {
-	// 			case "attaboy":
-	// 				setColor("#FFD702");
-	// 				setColorTheme("#FFD702");
-	// 				break;
-	// 			case "ficelle":
-	// 				setColor("#3C6843");
-	// 				setColorTheme("#3C6843");
-	// 				break;
-	// 			case "yobatta":
-	// 				setColor("#D55D8D");
-	// 				setColorTheme("#D55D8D");
-	// 				break;
-	// 			default:
-	// 				console.log("not working");
-	// 				break;
-	// 		}
-	// 	};
-	// 	changeTheme();
-	//});
+
 	console.log(colorTheme);
 	return (
 		<>

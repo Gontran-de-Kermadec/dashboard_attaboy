@@ -24,9 +24,6 @@ import {
 	updateDoc,
 } from "firebase/firestore";
 
-//console.log(db);
-// import {  } from "react";
-
 const CustomButton = styled(Button)`
 	display: block;
 	transform: translateX(95%);
@@ -73,14 +70,8 @@ function CaisseForm() {
 	const [uberTips, setUberTips] = useState(0);
 	const [doordashTips, setDoordashTips] = useState(0);
 	const [restoTips, setRestoTips] = useState(0);
-	//button invisible
-	//const [invisible, setInvisible] = useState(true);
-	const [argentButton, setArgentButton] = useState(true);
-	const [tpvButton, setTpvButton] = useState(true);
-	const [wixButton, setWixButton] = useState(true);
-	// const [uberButton, setUberButton] = useState(true);
-	// const [doordashButton, setDoordashButton] = useState(true);
-	// const [restoButton, setRestoButton] = useState(true);
+
+	//label input
 
 	const removeTaxes = (amount) => {
 		return amount - amount * (15 / 100);
@@ -109,18 +100,8 @@ function CaisseForm() {
 			// uber: uberNumber,
 			doordash: doordashNumber,
 		},
+		tips: totalTips,
 	};
-	// const salesSummary = {
-	// 	date: date,
-	// 	timestamp: timeStampDate,
-	// 	argent: argentNumber,
-	// 	tpv: tpvNumber,
-	// 	wix: wixNumber,
-	// 	uber: uberNumber,
-	// 	doordash: doordashNumber,
-	// 	restoloco: restoNumber,
-	// 	total: total,
-	// };
 
 	const updateTotal = () => {
 		const tpvAmount = tpvNumber === undefined ? Number(0) : tpvNumber;
@@ -189,81 +170,6 @@ function CaisseForm() {
 		setTimeStampDate(testDate);
 		setError(false);
 	};
-	// const disableInput = (e) => {
-	// 	switch (e.target.id) {
-	// 		case "argent":
-	// 			return setArgent(true);
-	// 		case "tpv":
-	// 			return setTpv(true);
-	// 		case "wix":
-	// 			return setWixInput(true);
-	// 		case "uber":
-	// 			return setUberInput(true);
-	// 		case "doordash":
-	// 			return setDoordashInput(true);
-	// 		case "resto":
-	// 			return setRestoInput(true);
-	// 		// case 'error':
-	// 		//   return <Error text={text} />
-	// 		default:
-	// 			return null;
-	// 	}
-	// 	// if(e.target.id === "argent")
-	// 	// setArgent(true);
-	// };
-	// const enableInput = (e) => {
-	// 	switch (e.target.id) {
-	// 		case "argent_modify":
-	// 			return setArgent(false);
-	// 		case "tpv_modify":
-	// 			return setTpv(false);
-	// 		case "wix_modify":
-	// 			return setWixInput(false);
-	// 		case "uber_modify":
-	// 			return setUberInput(false);
-	// 		case "doordash_modify":
-	// 			return setDoordashInput(false);
-	// 		case "resto_modify":
-	// 			return setRestoInput(false);
-	// 		// case 'error':
-	// 		//   return <Error text={text} />
-	// 		default:
-	// 			return null;
-	// 	}
-	// };
-	// const toggleInput = (e) => {
-	// 	console.log(e.target.id);
-	// 	switch (e.target.id) {
-	// 		case "argent":
-	// 		case "tpv":
-	// 		case "wix":
-	// 			console.log("true");
-	// 			break;
-	// 		default:
-	// 			return null;
-	// 	}
-	// };
-
-	// const removeNumber = (e) => {
-	// 	let totalNumber = Number(total);
-	// 	console.log(e.target.id);
-	// 	switch (e.target.id) {
-	// 		case "argent_modify":
-	// 			//let removedNumber = Number(argentNumber);
-	// 			return setTotal(totalNumber - Number(argentNumber));
-	// 		case "tpv_modify":
-	// 			//let removedNumber = Number(argentNumber);
-	// 			return setTotal(totalNumber - Number(tpvNumber));
-	// 		// case 'error':
-	// 		//   return <Error text={text} />
-	// 		default:
-	// 			return null;
-	// 	}
-	// 	// let totalNumber = Number(total);
-	// 	// let removedNumber = Number(argentNumber);
-	// 	// let sum = totalNumber - removedNumber;
-	// 	// setTotal(sum);
-	// };
 
 	// firebase queries
 	// const checkingrequest = query(
@@ -291,6 +197,7 @@ function CaisseForm() {
 				salesSummary
 			);
 			console.log("Document written with ID: " + userDoc.id);
+			window.location.reload();
 		} else {
 			console.log("update");
 			querySnapshot.forEach((document) => {
@@ -301,11 +208,8 @@ function CaisseForm() {
 					`ventes/${activeRestaurant}/${selectedYear}`
 				);
 				const docRef = doc(ref, document.id);
-				// updateDoc(
-				// 	collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
-				// 	salesSummary
-				// );
 				updateDoc(docRef, salesSummary);
+				window.location.reload();
 			});
 		}
 		// querySnapshot.forEach((doc) => {
@@ -330,7 +234,6 @@ function CaisseForm() {
 		// console.log("Document written with ID: " + userDoc.id);
 
 		//const testCollection = collection(db, "attaboy", userDoc.id, "ventes");
-
 		//const subColl = await addDoc(testCollection, salesSummary);
 	};
 	const [error, setError] = React.useState(false);
@@ -352,7 +255,6 @@ function CaisseForm() {
 			onSubmit={handleSubmit}
 		>
 			<LocalizationProvider dateAdapter={AdapterDayjs}>
-				{/* <DemoContainer components={["DatePicker"]}> */}
 				<DatePicker
 					sx={{
 						left: "50%",
@@ -372,16 +274,13 @@ function CaisseForm() {
 						},
 					}}
 				/>
-				{/* </DemoContainer> */}
 			</LocalizationProvider>
-			{/* {error ? <p>Selection date</p> : null} */}
 			<div>
 				<CustomTitle>ARGENT</CustomTitle>
 				<CustomInputContainer>
 					<TextField
 						//disabled={argent}
 						//error
-						//{...argent ? disabled : null}
 						id="argent"
 						label="Argent"
 						type="number"
@@ -390,24 +289,12 @@ function CaisseForm() {
 						}}
 						onBlur={(e) => {
 							updateTotal();
-							// disableInput(e);
 						}}
 					/>
-					{argentButton ? null : (
-						<Button
-							id="argent_modify"
-							onClick={(e) => {
-								setArgentNumber(Number(e.target.value));
-								//enableInput(e);
-							}}
-						>
-							Modifier
-						</Button>
-					)}
 				</CustomInputContainer>
 			</div>
 			<div>
-				<Typography>TPV</Typography>
+				<CustomTitle>TPV</CustomTitle>
 				<CustomInputContainer>
 					<TextField
 						//error
@@ -420,24 +307,10 @@ function CaisseForm() {
 						}}
 						onBlur={(e) => {
 							updateTotal();
-							//setTpvNumber(Number(e.target.value));
-							// disableInput(e);
 						}}
 						//defaultValue="Ventes"
 						//helperText="Incorrect entry."
 					/>
-					{tpvButton ? null : (
-						<CustomButton
-							id="tpv_modify"
-							onClick={(e) => {
-								//removeNumber(e);
-								setTpvNumber(Number(e.target.value));
-								//enableInput(e);
-							}}
-						>
-							Modifier ventes
-						</CustomButton>
-					)}
 
 					<TextField
 						//error
@@ -451,8 +324,6 @@ function CaisseForm() {
 						}}
 						onBlur={(e) => {
 							updateTotalTips();
-							//setTpvNumber(Number(e.target.value));
-							// disableInput(e);
 						}}
 					/>
 				</CustomInputContainer>
@@ -460,12 +331,8 @@ function CaisseForm() {
 			{activeRestaurant === "ficelle" ||
 			activeRestaurant === "yobatta" ? null : (
 				<div>
-					<Typography>Wix</Typography>
-					<CustomInputContainer
-					// sx={{
-					// 	padding: "1em",
-					// }}
-					>
+					<CustomTitle>WIX</CustomTitle>
+					<CustomInputContainer>
 						<TextField
 							//error
 							//disabled={wixInput}
@@ -497,29 +364,13 @@ function CaisseForm() {
 								updateTotalTips();
 							}}
 						/>
-						{wixButton ? null : (
-							<CustomButton
-								id="wix_modify"
-								onClick={(e) => {
-									//removeNumber(e);
-									setWixNumber(Number(e.target.value));
-									//enableInput(e);
-								}}
-							>
-								Modifier
-							</CustomButton>
-						)}
 					</CustomInputContainer>
 				</div>
 			)}
 			{activeRestaurant === "yobatta" ? null : (
 				<div>
-					<Typography>Uber</Typography>
-					<CustomInputContainer
-					// sx={{
-					// 	padding: "1em",
-					// }}
-					>
+					<CustomTitle>UBER</CustomTitle>
+					<CustomInputContainer>
 						<TextField
 							//error
 							//disabled={uberInput}
@@ -550,30 +401,13 @@ function CaisseForm() {
 								updateTotalTips();
 							}}
 						/>
-						{/* {uberButton ? null : (
-							<CustomButton
-								id="uber_modify"
-								onClick={(e) => {
-									setUberNumber(Number(e.target.value));
-									//enableInput(e);
-								}}
-							>
-								Modifier
-							</CustomButton>
-						)} */}
 					</CustomInputContainer>
 				</div>
 			)}
 			{activeRestaurant === "yobatta" ? null : (
 				<div>
-					<Typography>Doordash</Typography>
-					<CustomInputContainer
-					// sx={{
-					// 	padding: "1em",
-					// 	textAlign: "center",
-					// }}
-					>
-						{/* <div> */}
+					<CustomTitle>DOORDASH</CustomTitle>
+					<CustomInputContainer>
 						<TextField
 							//error
 							//disabled={doordashInput}
@@ -588,18 +422,7 @@ function CaisseForm() {
 								// disableInput(e);
 							}}
 						/>
-						{/* {doordashButton ? null : (
-							<CustomButton
-								id="doordash_modify"
-								onClick={(e) => {
-									setDoordashNumber(Number(e.target.value));
-									//enableInput(e);
-								}}
-							>
-								Modifier
-							</CustomButton>
-						)} */}
-						{/* </div> */}
+
 						<TextField
 							//error
 							id="standard-error-helper-text"
@@ -618,11 +441,10 @@ function CaisseForm() {
 			{activeRestaurant === "ficelle" ||
 			activeRestaurant === "yobatta" ? null : (
 				<div>
-					<Typography>Resto Loco</Typography>
+					<CustomTitle>RESTO LOCO</CustomTitle>
 					<CustomInputContainer>
 						<TextField
 							//error
-							//disabled={restoInput}
 							id="resto"
 							label="Resto Loco / Ventes"
 							type="number"
@@ -631,23 +453,8 @@ function CaisseForm() {
 							}}
 							onBlur={(e) => {
 								updateTotal();
-								// disableInput(e);
 							}}
 						/>
-
-						{/* {restoButton ? null : (
-							<CustomButton
-								// <CustomButton
-								id="resto_modify"
-								onClick={(e) => {
-									setRestoNumber(Number(e.target.value));
-									//enableInput(e);
-								}}
-							>
-								Modifier
-							</CustomButton>
-						)} */}
-						{/* </div> */}
 						<TextField
 							//error
 							id="standard-error-helper-text"
@@ -676,21 +483,21 @@ function CaisseForm() {
 						fontSize: "1.3em",
 					}}
 				>
-					Total ventes: {totalToDisplay}$
+					Total ventes: ${totalToDisplay}
 				</Typography>
 				<Typography
 					sx={{
 						fontSize: "1.3em",
 					}}
 				>
-					Total ventes HT: {total}$
+					Total ventes HT: ${total}
 				</Typography>
 				<Typography
 					sx={{
 						fontSize: "1.3em",
 					}}
 				>
-					Total tips: {totalTips}$
+					Total tips: ${totalTips}
 				</Typography>
 			</Container>
 			<Button

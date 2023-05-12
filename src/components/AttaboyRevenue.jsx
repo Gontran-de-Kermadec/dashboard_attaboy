@@ -9,7 +9,7 @@ import {
 	onSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { Container, Paper, Typography, Box, Divider } from "@mui/material";
+import { Paper, Typography, Box, Divider } from "@mui/material";
 import { BarRevenue } from "../components/charts/BarChart";
 import PieChart from "../components/charts/PieChart";
 // import { todayDate } from "../data/getData";
@@ -24,6 +24,7 @@ function AttaboyRevenue() {
 
 	//data for charts
 	const [labels, setLabels] = useState();
+	const [allRevenue, setAllRevenue] = useState([]);
 
 	const [revenue, setRevenue] = useState(0);
 	const [uberRevenue, setUberRevenue] = useState(0);
@@ -32,7 +33,6 @@ function AttaboyRevenue() {
 	const [wixRevenue, setWixRevenue] = useState(0);
 	const [doordashRevenue, setDoordashRevenue] = useState(0);
 	const [restoLocoRevenue, setRestoLocoRevenue] = useState(0);
-	const [allRevenue, setAllRevenue] = useState([]);
 	const [lastDailyRevenue, setLastDailyRevenue] = useState();
 
 	//weeks before
@@ -295,7 +295,7 @@ function AttaboyRevenue() {
 		onSnapshot(lastDayRequest, (querySnapshot) => {
 			if (querySnapshot.empty) {
 				console.log("pas de revenus hier");
-				setLastDailyRevenue("Caisse pas faite");
+				setLastDailyRevenue(0);
 			} else {
 				querySnapshot.forEach((doc) => {
 					console.log(doc.data().sourcesOfRevenues);
@@ -421,28 +421,46 @@ function AttaboyRevenue() {
 	console.log(finalCount);
 	return (
 		<>
-			<Typography
+			<Box
 				sx={{
-					fontSize: "2em",
-					margin: "1em 0;",
+					margin: "3em 0",
 				}}
 			>
-				Chiffres d'affaires :{" "}
-				<Typography variant="span" sx={{ color: colorTheme }}>
-					$ {revenue}
+				<Typography
+					sx={{
+						fontSize: "2em",
+						//margin: "1em 0;",
+					}}
+				>
+					Chiffre d'affaires:{" "}
+					<Typography
+						variant="span"
+						sx={{ color: "#e0bf00", fontStyle: "oblique", fontWeight: "bold" }}
+					>
+						$ {revenue}
+					</Typography>
 				</Typography>
-			</Typography>
-			<Typography
-				sx={{
-					fontSize: "2em",
-					margin: "1em 0;",
-				}}
-			>
-				Chiffres d'affaires de la veille :{" "}
-				<Typography variant="span" sx={{ color: colorTheme }}>
-					$ {lastDailyRevenue}
+				<Typography
+					sx={{
+						fontSize: "1.2em",
+						//margin: "1em 0;",
+					}}
+				>
+					Chiffre d'affaires hier:{" "}
+					<Typography
+						variant="span"
+						sx={{
+							color: "#e0bf00",
+							fontStyle: "oblique",
+							fontWeight: "bold",
+						}}
+					>
+						{lastDailyRevenue === 0
+							? "Caisse pas faite"
+							: "$" + lastDailyRevenue}
+					</Typography>
 				</Typography>
-			</Typography>
+			</Box>
 			<Box
 				sx={{
 					display: "flex",
@@ -493,11 +511,12 @@ function AttaboyRevenue() {
 				</div>
 			</Box>
 			<Divider />
-			<Box
+
+			{/* section to display weekly variation */}
+			{/* <Box
 				sx={{
 					display: "flex",
 					justifyContent: "space-around",
-					// flexWrap: "wrap",
 				}}
 			>
 				{finalCount.map((value, i) => {
@@ -519,8 +538,9 @@ function AttaboyRevenue() {
 						</Item>
 					);
 				})}
-			</Box>
-			<Box
+			</Box> */}
+			{/* section to display monthly variation */}
+			{/* <Box
 				sx={{
 					display: "flex",
 					justifyContent: "space-around",
@@ -547,7 +567,7 @@ function AttaboyRevenue() {
 						</Item>
 					);
 				})}
-			</Box>
+			</Box> */}
 		</>
 	);
 }

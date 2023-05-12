@@ -34,6 +34,19 @@ const options = {
 		},
 	},
 };
+const yobattaOptions = {
+	responsive: true,
+	plugins: {
+		legend: {
+			position: "top",
+			display: false,
+		},
+		title: {
+			display: true,
+			text: "Sources de revenus",
+		},
+	},
+};
 
 function BarComparison() {
 	let labelYear = [];
@@ -99,6 +112,36 @@ function HomeBarRevenue(props) {
 	};
 	return <Bar data={data} width={400} height={200} options={options} />;
 }
+function YobattaBarRevenue(props) {
+	const { dataLabel, dataNumbers, backgroundColor } = props;
+	console.log(dataNumbers);
+	const data = {
+		labels: dataLabel,
+		datasets: [
+			{
+				label: "$",
+				data: dataNumbers,
+				backgroundColor: backgroundColor,
+			},
+		],
+	};
+	return <Bar data={data} width={400} height={200} options={yobattaOptions} />;
+}
+function FicelleBarRevenue(props) {
+	const { dataLabel, dataNumbers, backgroundColor } = props;
+	console.log(dataNumbers);
+	const data = {
+		labels: dataLabel,
+		datasets: [
+			{
+				label: "$",
+				data: dataNumbers,
+				backgroundColor: backgroundColor,
+			},
+		],
+	};
+	return <Bar data={data} width={400} height={200} options={yobattaOptions} />;
+}
 
 function BarChart() {
 	ChartJS.register(
@@ -137,4 +180,11 @@ function BarChart() {
 }
 
 //export default BarChart;
-export { BarChart, BarComparison, BarRevenue, HomeBarRevenue };
+export {
+	BarChart,
+	BarComparison,
+	BarRevenue,
+	HomeBarRevenue,
+	YobattaBarRevenue,
+	FicelleBarRevenue,
+};

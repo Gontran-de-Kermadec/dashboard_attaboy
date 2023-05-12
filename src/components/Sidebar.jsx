@@ -30,10 +30,8 @@ function Sidebar() {
 	console.log(open);
 	// const [store, setStore] = useState("Attaboy");
 	const [activeRestaurant, setActiveRestaurant] = useContext(RestaurantContext);
-	//const [color, setColor] = useState();
 	const [colorTheme] = useContext(ThemeContext);
 	const selectStore = (e) => {
-		//setStore(e.currentTarget.innerText);
 		setActiveRestaurant(e.currentTarget.innerText.toLowerCase());
 	};
 	const handleClick = (e) => {
@@ -43,43 +41,6 @@ function Sidebar() {
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
-	// useEffect(() => {
-	// 	const changeTheme = () => {
-	// 		// switch (activeRestaurant) {
-	// 		// 	case "attaboy":
-	// 		// 		setColor("#FFD702");
-	// 		// 		break;
-	// 		// 	case "ficelle":
-	// 		// 		setColor("#3C6843");
-	// 		// 		break;
-	// 		// 	case "yobatta":
-	// 		// 		setColor("#D55D8D");
-	// 		// 		break;
-	// 		// 	default:
-	// 		// 		console.log("not working");
-	// 		// 		break;
-	// 		// }
-	// 		switch (activeRestaurant) {
-	// 			case "attaboy":
-	// 				//setColor("#FFD702");
-	// 				setColorTheme("#FFD702");
-	// 				break;
-	// 			case "ficelle":
-	// 				//setColor("#3C6843");
-	// 				setColorTheme("#3C6843");
-	// 				break;
-	// 			case "yobatta":
-	// 				//setColor("#D55D8D");
-	// 				setColorTheme("#D55D8D");
-	// 				break;
-	// 			default:
-	// 				console.log("not working");
-	// 				break;
-	// 		}
-	// 	};
-	// 	changeTheme();
-	// }, [activeRestaurant, setColorTheme]);
-	//console.log(color);
 	const menuItems = ["Caisse", "Revenus", "Dépenses"];
 	const menu = [
 		{
@@ -95,7 +56,6 @@ function Sidebar() {
 			section: ["Employes", "Planning", "Salaires"],
 		},
 	];
-	// const navigate = useNavigate();
 	return (
 		<>
 			<Drawer
@@ -124,7 +84,6 @@ function Sidebar() {
 							fontSize: "1.2em",
 							borderRadius: "inherit",
 							"&:hover": {
-								// backgroundColor: color,
 								backgroundColor: colorTheme,
 							},
 						}}
@@ -179,32 +138,6 @@ function Sidebar() {
 						</MenuItem>
 					</Menu>
 				</Box>
-				{/* <List>
-					<ListItemButton>
-						<Link to="/">
-							<ListItem>
-								<ListItemText primary="Dashboard" />
-							</ListItem>
-						</Link>
-					</ListItemButton>
-				</List> */}
-
-				{/* <div>
-					<Typography variant="h6">Finances</Typography>
-				</div> */}
-				{/* <List>
-					{menuItems.map((item, index) => (
-						<ListItemButton key={index}>
-							<Link to={item}>
-								<ListItem>
-									<ListItemText primary={item} />
-								</ListItem>
-							</Link>
-						</ListItemButton>
-					))}
-				</List>
-			
-				<Divider /> */}
 				{/* <Accordion>
 					<AccordionSummary expandIcon={<ExpandMoreIcon />}>
 						<Typography>Finances</Typography>
@@ -226,38 +159,25 @@ function Sidebar() {
 				</Accordion> */}
 				<List>
 					{menu.map((item, index) => (
-						// <ListItemButton onClick={() => navigate(`/${item}`)}>
 						<div key={index}>
-							{/* <Typography>{item.title}</Typography> */}
-							{/* <ListItemButton>
-								<Link to={item.section}>
-									<ListItem>
-										<ListItemText primary={item.section} />
-									</ListItem>
-								</Link>
-							</ListItemButton> */}
 							{item.section ? (
 								<>
-									{/* <Accordion>
-										<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-											<Typography>{item.title}</Typography>
-										</AccordionSummary>
-										<AccordionDetails>
-											{item.section.map((item, index) => (
-												<ListItemButton key={index}>
-													<Link to={`/${item}`}>
-														<ListItem>
-															<ListItemText primary={item} />
-														</ListItem>
-													</Link>
-												</ListItemButton>
-											))}
-										</AccordionDetails>
-									</Accordion> */}
-									<Typography>{item.title}</Typography>
+									<Typography
+										sx={{
+											fontSize: "1.2em",
+										}}
+									>
+										{item.title}
+									</Typography>
 									{item.section.map((item, index) => (
 										<ListItemButton key={index}>
-											<Link to={`/${item}`}>
+											<Link
+												to={`/${item}`}
+												style={{
+													textDecoration: "none",
+													color: "#000",
+												}}
+											>
 												<ListItem>
 													<ListItemText primary={item} />
 												</ListItem>
@@ -269,13 +189,17 @@ function Sidebar() {
 							) : (
 								<>
 									<ListItemButton>
-										{/* <Link to={`/${item.title}`}> */}
-										<Link to={item.path}>
-											{/* <ListItem>
+										<Link
+											to={item.path}
+											style={{
+												textDecoration: "none",
+												color: "#000",
+											}}
+										>
+											{/* <Typography>{item.title}</Typography> */}
+											<ListItem>
 												<ListItemText primary={item.title} />
-											</ListItem> */}
-											{/* {item.title} */}
-											<Typography>{item.title}</Typography>
+											</ListItem>
 										</Link>
 									</ListItemButton>
 									<Divider />

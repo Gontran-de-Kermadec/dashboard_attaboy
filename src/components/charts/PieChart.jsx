@@ -34,7 +34,6 @@ function PieChart(props) {
 		},
 	};
 	const data = {
-		// labels: ["Argent", "Tpv", "Uber", "Doordash", "wix", "Resto Loco"],
 		labels: dataLabel,
 		datasets: [
 			{

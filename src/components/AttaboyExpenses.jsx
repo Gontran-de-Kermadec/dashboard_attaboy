@@ -3,16 +3,9 @@ import { Container, Divider, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
-import DateSelection from "./utils/DateSelection";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import TextField from "@mui/material/TextField";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
+
 import ListItemText from "@mui/material/ListItemText";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -60,7 +53,6 @@ function AttaboyExpenses() {
 	const [activePeriod] = useContext(PeriodContext);
 	const [colorTheme] = useContext(ThemeContext);
 
-	const [type, setType] = useState("");
 	const [totalSalary, setTotalSalary] = useState(0);
 	const [totalOrder, setTotalOrder] = useState(0);
 	const [totalOther, setTotalOther] = useState(0);
@@ -274,7 +266,6 @@ function AttaboyExpenses() {
 			</Modal>
 			<Container
 				sx={{
-					// textAlign: "center",
 					margin: "2em auto",
 				}}
 			>
@@ -307,18 +298,6 @@ function AttaboyExpenses() {
 						})}
 					</AccordionDetails>
 				</Accordion>
-				{/* <Typography>Detail des salaires</Typography> */}
-				{/* {salaryDetails.map((element, index) => {
-					return (
-						<List key={index}>
-							<ListItem>
-								<ListItemText>
-									{element.date} ={">"} {element.total}
-								</ListItemText>
-							</ListItem>
-						</List>
-					);
-				})} */}
 			</Container>
 			<Container
 				sx={{

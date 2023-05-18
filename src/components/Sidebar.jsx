@@ -1,25 +1,20 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 // import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDownIcon";
 import {
 	Divider,
 	Typography,
-	Accordion,
-	AccordionSummary,
-	AccordionDetails,
 	Button,
 	Menu,
 	MenuItem,
 	Box,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { RestaurantContext, ThemeContext } from "../App";
 // import { useNavigate, Link } from "react-router-dom";
@@ -41,7 +36,7 @@ function Sidebar() {
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
-	const menuItems = ["Caisse", "Revenus", "Dépenses"];
+	// const menuItems = ["Caisse", "Revenus", "Dépenses"];
 	const menu = [
 		{
 			title: "Vue d'ensemble",
@@ -60,11 +55,6 @@ function Sidebar() {
 		<>
 			<Drawer
 				sx={{
-					// "& .MuiDrawerer-root": {
-					// 	width: 500,
-					// 	backgroundColor: "red",
-					// 	position: "initial",
-					// },
 					"& .MuiPaper-root": {
 						width: 200,
 						position: "initial",
@@ -79,7 +69,6 @@ function Sidebar() {
 						sx={{
 							width: "100%",
 							color: "white",
-							// backgroundColor: color,
 							backgroundColor: colorTheme,
 							fontSize: "1.2em",
 							borderRadius: "inherit",
@@ -116,6 +105,15 @@ function Sidebar() {
 								handleClose();
 							}}
 						>
+							SOGUARES
+						</MenuItem>
+						<Divider />
+						<MenuItem
+							onClick={(e) => {
+								selectStore(e);
+								handleClose();
+							}}
+						>
 							ATTABOY
 						</MenuItem>
 						<Divider />
@@ -138,25 +136,6 @@ function Sidebar() {
 						</MenuItem>
 					</Menu>
 				</Box>
-				{/* <Accordion>
-					<AccordionSummary expandIcon={<ExpandMoreIcon />}>
-						<Typography>Finances</Typography>
-					</AccordionSummary>
-					<AccordionDetails>
-						<List>
-							{["Revenu", "Depenses"].map((item, index) => (
-								// <ListItemButton onClick={() => navigate(`/${item}`)}>
-								<ListItemButton key={index}>
-									<Link to={item}>
-										<ListItem>
-											<ListItemText primary={item} />
-										</ListItem>
-									</Link>
-								</ListItemButton>
-							))}
-						</List>
-					</AccordionDetails>
-				</Accordion> */}
 				<List>
 					{menu.map((item, index) => (
 						<div key={index}>
@@ -196,7 +175,6 @@ function Sidebar() {
 												color: "#000",
 											}}
 										>
-											{/* <Typography>{item.title}</Typography> */}
 											<ListItem>
 												<ListItemText primary={item.title} />
 											</ListItem>

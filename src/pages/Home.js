@@ -23,6 +23,7 @@ import {
 	onSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import AttaboyOverview from "../components/AttaboyOverview";
 
 const Item = styled(Paper)(({ theme }) => ({
 	textAlign: "center",
@@ -34,7 +35,7 @@ function Home() {
 	const [activePeriod] = useContext(PeriodContext);
 	const [activeRestaurant] = useContext(RestaurantContext);
 	const [colorTheme] = useContext(ThemeContext);
-
+	console.log(activeRestaurant);
 	//revenue const
 	const [globalRevenue, setGlobalRevenue] = useState(null);
 	const [revenue, setRevenue] = useState(null);
@@ -53,13 +54,23 @@ function Home() {
 	const [totalOrder, setTotalOrder] = useState(0);
 	const [totalOther, setTotalOther] = useState(0);
 	const [totalExpenses, setTotalExpenses] = useState(0);
-	const [totalAttaboySalary, setTotalAttaboySalary] = useState(0);
+	const [attaboySalary, setAttaboySalary] = useState(0);
+	const [attaboyOrders, setAttaboyOrders] = useState(0);
+	const [attaboyOthers, setAttaboyOthers] = useState(0);
+	const [ficelleSalary, setFicelleSalary] = useState(0);
+	const [ficelleOrders, setFicelleOrders] = useState(0);
+	const [ficelleOthers, setFicelleOthers] = useState(0);
+	const [yobattaSalary, setYobattaSalary] = useState(0);
+	const [yobattaOrders, setYobattaOrders] = useState(0);
+	const [yobattaOthers, setYobattaOthers] = useState(0);
 	const [totalFicelleSalary, setTotalFicelleSalary] = useState(0);
 	const [totalYobattaSalary, setTotalYobattaSalary] = useState(0);
 	const [test, setTest] = useState(0);
 	const [totalAttaboyExpenses, setTotalAttaboyExpenses] = useState(0);
 	const [totalFicelleExpenses, setTotalFicelleExpenses] = useState(0);
 	const [totalYobattaExpenses, setTotalYobattaExpenses] = useState(0);
+	const [globalSalaryExpenses, setGlobalSalaryExpenses] = useState(0);
+	const [globalOrdersExpenses, setGlobalOrdersExpenses] = useState(0);
 
 	//background charts const
 	const yobattaBackgroundColor = ["#D55D8D", "#922651"];
@@ -70,21 +81,16 @@ function Home() {
 	const attaboyDataNumbers = [totalAttaboyRevenue, totalAttaboyExpenses];
 	const ficelleDataNumbers = [totalFicelleRevenue, totalFicelleExpenses];
 	const yobattaDataNumbers = [totalYobattaRevenue, totalYobattaExpenses];
-	const Item = styled(Paper)(({ theme }) => ({
-		textAlign: "center",
-		width: "30%",
-		margin: "1em",
-		padding: "0.5em",
-		background: colorTheme,
-	}));
+	// const Item = styled(Paper)(({ theme }) => ({
+	// 	textAlign: "center",
+	// 	width: "30%",
+	// 	margin: "1em",
+	// 	padding: "0.5em",
+	// 	background: colorTheme,
+	// }));
 
 	const StyledTypo = styled(Typography)(({ theme }) => ({
 		fontSize: "1.2em",
-		//margin: "0.3em",
-		// color:
-		// 	activeRestaurant === "ficelle" || activeRestaurant === "yobatta"
-		// 		? "#fff"
-		// 		: "#000",
 	}));
 	useEffect(() => {
 		const globalRevenue =
@@ -96,6 +102,14 @@ function Home() {
 			totalAttaboyExpenses + totalFicelleExpenses + totalYobattaExpenses;
 		setGlobalExpenses(globalExpenses);
 	}, [totalAttaboyExpenses, totalFicelleExpenses, totalYobattaExpenses]);
+	useEffect(() => {
+		const globalSalaryExpenses = attaboySalary + ficelleSalary + yobattaSalary;
+		setGlobalSalaryExpenses(globalSalaryExpenses);
+	}, [attaboySalary, ficelleSalary, yobattaSalary]);
+	useEffect(() => {
+		const globalOrdersExpenses = attaboyOrders + ficelleOrders + yobattaOrders;
+		setGlobalOrdersExpenses(globalOrdersExpenses);
+	}, [attaboyOrders, ficelleOrders, yobattaOrders]);
 	// useEffect(() => {
 	// 	const displayData = () => {
 	// 		if (activePeriod === "annee") {
@@ -139,9 +153,6 @@ function Home() {
 				? (startDate = todayDate)
 				: (startDate = midnightDate);
 		}
-		// let total = 0;
-		// let totalFicelle = 0;
-		// let totalYobatta = 0;
 
 		let incrementAttaboyRevenue = 0;
 		let incrementFicelleRevenue = 0;
@@ -164,7 +175,6 @@ function Home() {
 				});
 			} else if (restaurant === "ficelle") {
 				onSnapshot(request, (querySnapshot) => {
-					console.log(querySnapshot);
 					querySnapshot.forEach((doc) => {
 						console.log(doc.data());
 						incrementFicelleRevenue += doc.data().total;
@@ -173,7 +183,6 @@ function Home() {
 				});
 			} else if (restaurant === "yobatta") {
 				onSnapshot(request, (querySnapshot) => {
-					console.log(querySnapshot);
 					querySnapshot.forEach((doc) => {
 						console.log(doc.data());
 						incrementYobattaRevenue += doc.data().total;
@@ -197,10 +206,18 @@ function Home() {
 			date.getDate()
 		);
 		let startDate;
-		// let totalSalary = 0;
-		// let totalAttaboySalary = 0;
-		// let totalFicelleSalary = 0;
-		// let totalYobattaSalary = 0;
+
+		let attaboySalary = 0;
+		let ficelleSalary = 0;
+		let yobattaSalary = 0;
+
+		let attaboyOrders = 0;
+		let ficelleOrders = 0;
+		let yobattaOrders = 0;
+
+		let attaboyOthers = 0;
+		let ficelleOthers = 0;
+		let yobattaOthers = 0;
 
 		if (activePeriod === "annee") {
 			startDate = new Date(currentYear, 0, 1); //current year
@@ -213,21 +230,26 @@ function Home() {
 				? (startDate = todayDate)
 				: (startDate = midnightDate);
 		}
-		// const salaryRequest = (restaurant) => {
+
+		// const salaryRequest = (restaurant, type) => {
 		// 	const request = query(
-		// 		collection(db, `depenses/${restaurant}/Salaires`),
+		// 		collection(db, `depenses/${restaurant}/${type}`),
 		// 		where("timestamp", ">=", startDate),
 		// 		where("timestamp", "<=", todayDate)
 		// 	);
-		// 	return request;
 		// };
-		let incrementAttaboy = 0;
-		let incrementFicelle = 0;
-		let incrementYobatta = 0;
-		const salaryRequestTest = (restaurant, expenseType) => {
+		// salaryRequest("attaboy", "Salaires");
+		// salaryRequest("attaboy", "Commandes");
+		// salaryRequest("attaboy", "Autres");
+		// salaryRequest("ficelle", "Commandes");
+		// salaryRequest("ficelle", "Autres");
+		// salaryRequest("yobatta", "Salaires");
+		let totalAttaboyExpenses = 0;
+		let totalFicelleExpenses = 0;
+		let totalYobattaExpenses = 0;
+		const expenseRequest = (restaurant, expenseType) => {
 			const request = query(
 				collection(db, `depenses/${restaurant}/${expenseType}`),
-				// collection(db, `depenses/${restaurant}/Salaires`),
 				where("timestamp", ">=", startDate),
 				where("timestamp", "<=", todayDate)
 			);
@@ -235,44 +257,71 @@ function Home() {
 				onSnapshot(request, (querySnapshot) => {
 					console.log(querySnapshot);
 					querySnapshot.forEach((doc) => {
-						console.log(doc.data());
-						incrementAttaboy += doc.data().total;
+						totalAttaboyExpenses += doc.data().total;
+						if (expenseType === "Salaires") {
+							attaboySalary += doc.data().total;
+						} else if (expenseType === "Commandes") {
+							attaboyOrders += doc.data().total;
+						} else {
+							attaboyOthers += doc.data().total;
+						}
 					});
-					console.log(incrementAttaboy);
-					//setTest(incrementAttaboy);
-					setTotalAttaboyExpenses(incrementAttaboy);
+					setTotalAttaboyExpenses(totalAttaboyExpenses);
+					setAttaboySalary(attaboySalary);
+					setAttaboyOrders(attaboyOrders);
+					setAttaboyOthers(attaboyOthers);
 				});
 			} else if (restaurant === "ficelle") {
 				onSnapshot(request, (querySnapshot) => {
 					console.log(querySnapshot);
 					querySnapshot.forEach((doc) => {
 						console.log(doc.data());
-						incrementFicelle += doc.data().total;
+						totalFicelleExpenses += doc.data().total;
+						if (expenseType === "Salaires") {
+							ficelleSalary += doc.data().total;
+						} else if (expenseType === "Commandes") {
+							ficelleOrders += doc.data().total;
+						} else {
+							ficelleOthers += doc.data().total;
+						}
 					});
-					setTotalFicelleExpenses(incrementFicelle);
+					setTotalFicelleExpenses(totalFicelleExpenses);
+					setFicelleSalary(ficelleSalary);
+					setFicelleOrders(ficelleOrders);
+					setFicelleOthers(ficelleOthers);
 				});
 			} else if (restaurant === "yobatta") {
 				onSnapshot(request, (querySnapshot) => {
 					console.log(querySnapshot);
 					querySnapshot.forEach((doc) => {
 						console.log(doc.data());
-						incrementYobatta += doc.data().total;
+						totalYobattaExpenses += doc.data().total;
+						if (expenseType === "Salaires") {
+							yobattaSalary += doc.data().total;
+						} else if (expenseType === "Commandes") {
+							yobattaOrders += doc.data().total;
+						} else {
+							yobattaOthers += doc.data().total;
+						}
 					});
-					setTotalYobattaExpenses(incrementYobatta);
+					setTotalYobattaExpenses(totalYobattaExpenses);
+					setYobattaSalary(yobattaSalary);
+					setYobattaOrders(yobattaOrders);
+					setYobattaOthers(yobattaOthers);
 				});
 			}
 		};
-		salaryRequestTest("attaboy", "Salaires");
-		salaryRequestTest("attaboy", "Commandes");
-		salaryRequestTest("attaboy", "Autres");
+		expenseRequest("attaboy", "Salaires");
+		expenseRequest("attaboy", "Commandes");
+		expenseRequest("attaboy", "Autres");
 
-		salaryRequestTest("ficelle", "Salaires");
-		salaryRequestTest("ficelle", "Commandes");
-		salaryRequestTest("ficelle", "Autres");
+		expenseRequest("ficelle", "Salaires");
+		expenseRequest("ficelle", "Commandes");
+		expenseRequest("ficelle", "Autres");
 
-		salaryRequestTest("yobatta", "Salaires");
-		salaryRequestTest("yobatta", "Commandes");
-		salaryRequestTest("yobatta", "Autres");
+		expenseRequest("yobatta", "Salaires");
+		expenseRequest("yobatta", "Commandes");
+		expenseRequest("yobatta", "Autres");
 	}, [activePeriod, currentYear]);
 	// useEffect(() => {
 	// 	const date = new Date();
@@ -356,72 +405,141 @@ function Home() {
 		const sumOfExpenses = totalOther + totalOrder + totalSalary;
 		setTotalExpenses(sumOfExpenses);
 	}, [totalOrder, totalOther, totalSalary]);
-	console.log("ficelle " + ficelleRevenue);
-	console.log("yobatta " + yobattaRevenue);
-	console.log(test);
+
+	const ratioComparedToRevenue = (revenue, expense) => {
+		const ratio = (expense / revenue) * 100;
+		return Math.round(ratio);
+	};
+	const displayScoreColor = (value) => {
+		let color;
+		console.log(Number(value));
+		if (Number(value) > 60) {
+			console.log("pas bon");
+			color = "#D63838";
+		} else if (Number(value) > 30 && Number(value) < 60) {
+			color = "#F35815";
+		} else {
+			color = "#01790d";
+		}
+
+		return color;
+	};
 	return (
 		<div className="flex">
 			<Sidebar />
 			<Container>
 				<div>
 					<Period />
+				</div>
+				{activeRestaurant === "attaboy" ? (
+					<AttaboyOverview
+						totalAttaboyRevenue={totalAttaboyRevenue}
+						totalAttaboyExpenses={totalAttaboyExpenses}
+						attaboySalary={attaboySalary}
+						attaboyOrders={attaboyOrders}
+						attaboyOthers={attaboyOthers}
+					/>
+				) : null}
+
+				<Box>
+					<p>Ficelle</p>
+					<p>Salaires {ficelleSalary} </p>
+					<p>Commandes {ficelleOrders} </p>
+					<p>Autres {ficelleOthers} </p>
+				</Box>
+				<Box
+					sx={{
+						display: "flex",
+						justifyContent: "space-evenly",
+						flexWrap: "wrap",
+						textAlign: "center",
+						margin: "2em 0",
+					}}
+				>
 					<Box
 						sx={{
-							display: "flex",
-							justifyContent: "space-evenly",
-							flexWrap: "wrap",
-							textAlign: "center",
+							fontSize: "1.5em",
+						}}
+					>
+						<StyledTypo>Chiffre d'affaires global</StyledTypo>
+						<StyledTypo
+							sx={{
+								fontWeight: "bold",
+								fontStyle: "oblique",
+								"&.MuiTypography-root": {
+									color: "blue",
+								},
+							}}
+						>
+							$ {globalRevenue}
+						</StyledTypo>
+					</Box>
+					<Box
+						sx={{
+							fontSize: "1.5em",
+						}}
+					>
+						<StyledTypo>Dépenses globales</StyledTypo>
+						<StyledTypo
+							sx={{
+								fontWeight: "bold",
+								fontStyle: "oblique",
+								"&.MuiTypography-root": {
+									color: "blue",
+								},
+							}}
+						>
+							$ {globalExpenses}
+						</StyledTypo>
+					</Box>
+				</Box>
+				<Box>
+					<Box
+						sx={{
 							margin: "2em 0",
 						}}
 					>
-						<Box
-							sx={{
-								fontSize: "1.5em",
-							}}
-						>
-							<StyledTypo>Chiffre d'affaires global</StyledTypo>
-							<StyledTypo
-								sx={{
-									fontWeight: "bold",
-									fontStyle: "oblique",
-									"&.MuiTypography-root": {
-										color: "blue",
-									},
-								}}
-							>
-								$ {globalRevenue}
-							</StyledTypo>
-						</Box>
-						<Box
-							sx={{
-								fontSize: "1.5em",
-							}}
-						>
-							<StyledTypo>Dépenses globales</StyledTypo>
-							<StyledTypo
-								sx={{
-									fontWeight: "bold",
-									fontStyle: "oblique",
-									"&.MuiTypography-root": {
-										color: "blue",
-									},
-								}}
-							>
-								$ {globalExpenses}
-							</StyledTypo>
-						</Box>
+						<StyledTypo>Chiffre d'affaires global hier</StyledTypo>
+						<StyledTypo>
+							${globalSalaryExpenses}, ${globalOrdersExpenses}
+						</StyledTypo>
 					</Box>
-					<Box>
-						<Box
-							sx={{
-								margin: "2em 0",
-							}}
-						>
-							<StyledTypo>Chiffre d'affaires global hier</StyledTypo>
-							<StyledTypo>En cours</StyledTypo>
-						</Box>
-					</Box>
-				</div>
+				</Box>
+				<Box>
+					<Paper
+						elevation={2}
+						sx={{
+							background: displayScoreColor(
+								ratioComparedToRevenue(globalRevenue, globalSalaryExpenses)
+							),
+						}}
+					>
+						<StyledTypo>
+							Masse salariale{" "}
+							<Typography variant="span">
+								{ratioComparedToRevenue(globalRevenue, globalSalaryExpenses)}%
+							</Typography>
+						</StyledTypo>
+					</Paper>
+					<Paper
+						elevation={2}
+						sx={{
+							color: displayScoreColor(
+								ratioComparedToRevenue(globalRevenue, globalOrdersExpenses)
+							),
+						}}
+					>
+						<StyledTypo>
+							Commandes:{" "}
+							<Typography variant="span">
+								{ratioComparedToRevenue(globalRevenue, globalOrdersExpenses)}%
+							</Typography>
+						</StyledTypo>
+						{/* <StyledTypo>
+							{ratioComparedToRevenue(globalRevenue, globalOrdersExpenses)}%
+						</StyledTypo> */}
+					</Paper>
+				</Box>
 				<Box
 					sx={{
 						margin: "1em 0",
@@ -996,18 +1114,6 @@ function Home() {
 							</Box>
 						</Box>
 					</Paper>
-				</Box> */}
-
-				{/* <Box
-					sx={{
-						width: "40%",
-						paddingTop: 2,
-					}}
-				>
-					<PieChart />
-					{activePeriod === "semaine" ? <LineChart /> : null}
-					{activePeriod === "annee" ? <BarComparison /> : null}
-					<BarRevenue dataLabel={dataLabel} dataNumbers={dataNumbers} />
 				</Box> */}
 			</Container>
 		</div>

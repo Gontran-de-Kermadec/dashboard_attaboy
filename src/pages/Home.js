@@ -24,6 +24,9 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import AttaboyOverview from "../components/AttaboyOverview";
+import FicelleOverview from "../components/FicelleOverview";
+import YobattaOverview from "../components/YobattaOverview";
+import { getLastDayRevenue } from "../data/generalFonctions";
 
 const Item = styled(Paper)(({ theme }) => ({
 	textAlign: "center",
@@ -44,6 +47,7 @@ function Home() {
 	const [totalAttaboyRevenue, setTotalAttaboyRevenue] = useState(0);
 	const [totalFicelleRevenue, setTotalFicelleRevenue] = useState(0);
 	const [totalYobattaRevenue, setTotalYobattaRevenue] = useState(0);
+	const [lastDayYobattaRevenue, setlastDayYobattaRevenue] = useState(0);
 	// const [order, setOrder] = useState(null);
 	// const [avgTicket, setAvgTicket] = useState(null);
 	// const [allRevenue, setAllRevenue] = useState([]);
@@ -71,6 +75,7 @@ function Home() {
 	const [totalYobattaExpenses, setTotalYobattaExpenses] = useState(0);
 	const [globalSalaryExpenses, setGlobalSalaryExpenses] = useState(0);
 	const [globalOrdersExpenses, setGlobalOrdersExpenses] = useState(0);
+	const [globalOthersExpenses, setGlobalOthersExpenses] = useState(0);
 
 	//background charts const
 	const yobattaBackgroundColor = ["#D55D8D", "#922651"];
@@ -78,9 +83,10 @@ function Home() {
 	const attaboyBackgroundColor = ["#FFD702", "#FFEA70"];
 
 	const dataLabel = ["revenus", "depenses"];
-	const attaboyDataNumbers = [totalAttaboyRevenue, totalAttaboyExpenses];
+
 	const ficelleDataNumbers = [totalFicelleRevenue, totalFicelleExpenses];
 	const yobattaDataNumbers = [totalYobattaRevenue, totalYobattaExpenses];
+	const attaboyDataNumbers = [totalAttaboyRevenue, totalAttaboyExpenses];
 	// const Item = styled(Paper)(({ theme }) => ({
 	// 	textAlign: "center",
 	// 	width: "30%",
@@ -110,6 +116,10 @@ function Home() {
 		const globalOrdersExpenses = attaboyOrders + ficelleOrders + yobattaOrders;
 		setGlobalOrdersExpenses(globalOrdersExpenses);
 	}, [attaboyOrders, ficelleOrders, yobattaOrders]);
+	useEffect(() => {
+		const globalOthersExpenses = attaboyOthers + ficelleOthers + yobattaOthers;
+		setGlobalOthersExpenses(globalOthersExpenses);
+	}, [attaboyOthers, ficelleOthers, yobattaOthers]);
 	// useEffect(() => {
 	// 	const displayData = () => {
 	// 		if (activePeriod === "annee") {
@@ -424,6 +434,45 @@ function Home() {
 
 		return color;
 	};
+	const [lastDailyRevenue, setLastDailyRevenue] = useState();
+	const [lastDayAttaboyRevenue, setlastDayAttaboyRevenue] = useState(0);
+	const [lastDayFicelleRevenue, setlastDayFicelleRevenue] = useState(0);
+	useEffect(() => {
+		const date = new Date();
+		const currentYear = new Date().getFullYear();
+		const previousDay = new Date(
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate() - 1
+		);
+		getLastDayRevenue(
+			"attaboy",
+			currentYear,
+			previousDay,
+			setlastDayAttaboyRevenue
+		);
+		getLastDayRevenue(
+			"ficelle",
+			currentYear,
+			previousDay,
+			setlastDayFicelleRevenue
+		);
+		getLastDayRevenue(
+			"yobatta",
+			currentYear,
+			previousDay,
+			setlastDayYobattaRevenue
+		);
+	}, []);
+	useEffect(() => {
+		console.log(
+			lastDayAttaboyRevenue,
+			lastDayFicelleRevenue + lastDayYobattaRevenue
+		);
+		const x =
+			lastDayAttaboyRevenue + lastDayFicelleRevenue + lastDayYobattaRevenue;
+		setLastDailyRevenue(x);
+	}, [lastDayAttaboyRevenue, lastDayFicelleRevenue, lastDayYobattaRevenue]);
 	return (
 		<div className="flex">
 			<Sidebar />
@@ -440,681 +489,483 @@ function Home() {
 						attaboyOthers={attaboyOthers}
 					/>
 				) : null}
+				{activeRestaurant === "ficelle" ? (
+					<FicelleOverview
+						totalFicelleRevenue={totalFicelleRevenue}
+						totalFicelleExpenses={totalFicelleExpenses}
+						ficelleSalary={ficelleSalary}
+						ficelleOrders={ficelleOrders}
+						ficelleOthers={ficelleOthers}
+					/>
+				) : null}
+				{activeRestaurant === "yobatta" ? (
+					<YobattaOverview
+						totalYobattaRevenue={totalYobattaRevenue}
+						totalYobattaExpenses={totalYobattaExpenses}
+						yobattaSalary={yobattaSalary}
+						yobattaOrders={yobattaOrders}
+						yobattaOthers={yobattaOthers}
+					/>
+				) : null}
 
-				<Box>
-					<p>Ficelle</p>
-					<p>Salaires {ficelleSalary} </p>
-					<p>Commandes {ficelleOrders} </p>
-					<p>Autres {ficelleOthers} </p>
-				</Box>
-				<Box
-					sx={{
-						display: "flex",
-						justifyContent: "space-evenly",
-						flexWrap: "wrap",
-						textAlign: "center",
-						margin: "2em 0",
-					}}
-				>
-					<Box
-						sx={{
-							fontSize: "1.5em",
-						}}
-					>
-						<StyledTypo>Chiffre d'affaires global</StyledTypo>
-						<StyledTypo
-							sx={{
-								fontWeight: "bold",
-								fontStyle: "oblique",
-								"&.MuiTypography-root": {
-									color: "blue",
-								},
-							}}
-						>
-							$ {globalRevenue}
-						</StyledTypo>
-					</Box>
-					<Box
-						sx={{
-							fontSize: "1.5em",
-						}}
-					>
-						<StyledTypo>Dépenses globales</StyledTypo>
-						<StyledTypo
-							sx={{
-								fontWeight: "bold",
-								fontStyle: "oblique",
-								"&.MuiTypography-root": {
-									color: "blue",
-								},
-							}}
-						>
-							$ {globalExpenses}
-						</StyledTypo>
-					</Box>
-				</Box>
-				<Box>
-					<Box
-						sx={{
-							margin: "2em 0",
-						}}
-					>
-						<StyledTypo>Chiffre d'affaires global hier</StyledTypo>
-						<StyledTypo>
-							${globalSalaryExpenses}, ${globalOrdersExpenses}
-						</StyledTypo>
-					</Box>
-				</Box>
-				<Box>
-					<Paper
-						elevation={2}
-						sx={{
-							background: displayScoreColor(
-								ratioComparedToRevenue(globalRevenue, globalSalaryExpenses)
-							),
-						}}
-					>
-						<StyledTypo>
-							Masse salariale{" "}
-							<Typography variant="span">
-								{ratioComparedToRevenue(globalRevenue, globalSalaryExpenses)}%
-							</Typography>
-						</StyledTypo>
-					</Paper>
-					<Paper
-						elevation={2}
-						sx={{
-							color: displayScoreColor(
-								ratioComparedToRevenue(globalRevenue, globalOrdersExpenses)
-							),
-						}}
-					>
-						<StyledTypo>
-							Commandes:{" "}
-							<Typography variant="span">
-								{ratioComparedToRevenue(globalRevenue, globalOrdersExpenses)}%
-							</Typography>
-						</StyledTypo>
-						{/* <StyledTypo>
-							{ratioComparedToRevenue(globalRevenue, globalOrdersExpenses)}%
-						</StyledTypo> */}
-					</Paper>
-				</Box>
-				<Box
-					sx={{
-						margin: "1em 0",
-					}}
-				>
-					<Paper>
-						<Box
-							sx={{
-								background: "#FFD702",
-								borderTopLeftRadius: "4px",
-								borderTopRightRadius: "4px",
-							}}
-						>
-							<Typography
-								sx={{
-									fontWeight: "bold",
-									padding: "0.5em",
-									fontSize: "1.3em",
-								}}
-							>
-								Restaurant Attaboy pizza inc.
-							</Typography>
-						</Box>
-						<Box
-							sx={{
-								padding: "1em",
-								display: "flex",
-								justifyContent: "space-around",
-							}}
-						>
-							<Box
-								sx={{
-									width: "40%",
-								}}
-							>
-								<Box
-									sx={{
-										margin: "1em",
-									}}
-								>
-									<StyledTypo>Chiffre d'affaires d'hier: </StyledTypo>
-									<StyledTypo
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										Caisse pas faite
-									</StyledTypo>
-								</Box>
-								<Divider />
-								<Box
-									sx={{
-										margin: "1em",
-									}}
-								>
-									<StyledTypo>Chiffre d'affaires: </StyledTypo>
-									<StyledTypo
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										${totalAttaboyRevenue}
-									</StyledTypo>
-								</Box>
-								<Divider />
-								<Box
-									sx={{
-										margin: "1em",
-									}}
-								>
-									<StyledTypo>Dépenses: </StyledTypo>
-									<StyledTypo
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										${totalAttaboyExpenses}
-									</StyledTypo>
-								</Box>
-							</Box>
-							<Box>
-								<HomeBarRevenue
-									dataLabel={dataLabel}
-									dataNumbers={attaboyDataNumbers}
-									backgroundColor={attaboyBackgroundColor}
-								/>
-							</Box>
-						</Box>
-					</Paper>
-				</Box>
-				<Divider />
-				{/* <Box
-					sx={{
-						display: "flex",
-						justifyContent: "space-evenly",
-						alignItems: "center",
-						margin: "1em 0",
-					}}
-				>
+				{activeRestaurant === "soguares" ? (
 					<Box>
-						<BarRevenue dataLabel={dataLabel} dataNumbers={dataNumbers} />
-					</Box>
-					<Paper>
 						<Box
 							sx={{
-								background: "#3C6843",
-								borderTopLeftRadius: "4px",
-								borderTopRightRadius: "4px",
-							}}
-						>
-							<Typography
-								sx={{
-									fontWeight: "bold",
-									padding: "0.5em",
-									fontSize: "1.3em",
-								}}
-							>
-								Ficelle
-							</Typography>
-						</Box>
-						<Box
-							sx={{
-								padding: "1em",
-							}}
-						>
-							<Box
-								sx={{
-									margin: "1em",
-								}}
-							>
-								<StyledTypo>
-									Chiffre d'affaires d'hier:{" "}
-									<Typography
-										variant="span"
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										$20154
-									</Typography>
-								</StyledTypo>
-							</Box>
-							<Divider />
-							<Box
-								sx={{
-									margin: "1em",
-								}}
-							>
-								<StyledTypo>
-									Chiffre d'affaires:{" "}
-									<Typography
-										variant="span"
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										${ficelleRevenue}
-									</Typography>
-								</StyledTypo>
-							</Box>
-							<Divider />
-							<Box
-								sx={{
-									margin: "1em",
-								}}
-							>
-								<StyledTypo>
-									Dépenses:{" "}
-									<Typography
-										variant="span"
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										${totalExpenses}
-									</Typography>
-								</StyledTypo>
-							</Box>
-						</Box>
-					</Paper>
-				</Box> */}
-				<Box
-					sx={{
-						margin: "1em 0",
-					}}
-				>
-					<Paper>
-						<Box
-							sx={{
-								background: "#3C6843",
-								borderTopLeftRadius: "4px",
-								borderTopRightRadius: "4px",
-							}}
-						>
-							<Typography
-								sx={{
-									fontWeight: "bold",
-									padding: "0.5em",
-									fontSize: "1.3em",
-									textAlign: "right",
-								}}
-							>
-								Restaurant Ficelle inc.
-							</Typography>
-						</Box>
-						<Box
-							sx={{
-								padding: "1em",
 								display: "flex",
-								justifyContent: "space-around",
+								justifyContent: "space-evenly",
+								flexWrap: "wrap",
+								textAlign: "center",
+								margin: "2em 0",
 							}}
 						>
-							<Box>
-								<HomeBarRevenue
-									dataLabel={dataLabel}
-									dataNumbers={ficelleDataNumbers}
-									backgroundColor={ficelleBackgroundColor}
-								/>
+							<Box
+								sx={{
+									fontSize: "1.5em",
+								}}
+							>
+								<StyledTypo>Chiffre d'affaires global</StyledTypo>
+								<StyledTypo
+									sx={{
+										fontWeight: "bold",
+										fontStyle: "oblique",
+										"&.MuiTypography-root": {
+											color: colorTheme,
+										},
+									}}
+								>
+									$ {globalRevenue}
+								</StyledTypo>
 							</Box>
 							<Box
 								sx={{
-									width: "40%",
-									textAlign: "right",
+									fontSize: "1.5em",
 								}}
 							>
-								<Box
+								<StyledTypo>Dépenses globales</StyledTypo>
+								<StyledTypo
 									sx={{
-										margin: "1em",
+										fontWeight: "bold",
+										fontStyle: "oblique",
+										"&.MuiTypography-root": {
+											color: colorTheme,
+										},
 									}}
 								>
-									<StyledTypo>Chiffre d'affaires d'hier: </StyledTypo>
-									<StyledTypo
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										Caisse pas faite
-									</StyledTypo>
-								</Box>
-								<Divider />
-								<Box
-									sx={{
-										margin: "1em",
-									}}
-								>
-									<StyledTypo>Chiffre d'affaires: </StyledTypo>
-									<StyledTypo
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										${totalFicelleRevenue}
-									</StyledTypo>
-								</Box>
-								<Divider />
-								<Box
-									sx={{
-										margin: "1em",
-									}}
-								>
-									<StyledTypo>Dépenses: </StyledTypo>
-									<StyledTypo
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										$ {totalFicelleExpenses}
-									</StyledTypo>
-								</Box>
+									$ {globalExpenses}
+								</StyledTypo>
 							</Box>
 						</Box>
-					</Paper>
-				</Box>
-				<Divider />
-				<Box
-					sx={{
-						margin: "1em 0",
-					}}
-				>
-					<Paper>
-						<Box
-							sx={{
-								background: "#D55D8D",
-								borderTopLeftRadius: "4px",
-								borderTopRightRadius: "4px",
-							}}
-						>
-							<Typography
+						<Box>
+							<Box
 								sx={{
-									fontWeight: "bold",
-									padding: "0.5em",
-									fontSize: "1.3em",
+									margin: "4em 0",
 								}}
 							>
-								Yobatta sucrerie de quartier inc.
-							</Typography>
+								<StyledTypo>
+									Chiffre d'affaires global hier:{" "}
+									<Typography
+										variant="span"
+										sx={{
+											fontStyle: "oblique",
+											fontWeight: "bold",
+											color: colorTheme,
+										}}
+									>
+										{lastDailyRevenue === 0
+											? "Caisse pas faite"
+											: "$" + lastDailyRevenue}
+									</Typography>
+								</StyledTypo>
+							</Box>
 						</Box>
 						<Box
 							sx={{
-								padding: "1em",
 								display: "flex",
-								justifyContent: "space-around",
+								justifyContent: "space-evenly",
+								textAlign: "center",
+								margin: "5em 0",
 							}}
 						>
-							<Box
+							<Paper
+								elevation={2}
 								sx={{
-									width: "40%",
+									background: displayScoreColor(
+										ratioComparedToRevenue(globalRevenue, globalSalaryExpenses)
+									),
 								}}
 							>
-								<Box
+								<StyledTypo
 									sx={{
-										margin: "1em",
+										padding: "1em",
 									}}
 								>
-									<StyledTypo>Chiffre d'affaires d'hier: </StyledTypo>
-									<StyledTypo
+									Masse salariale{" "}
+									<Typography
+										variant="span"
 										sx={{
+											display: "block",
 											fontWeight: "bold",
-											fontStyle: "oblique",
+											fontSize: "1.8em",
 										}}
 									>
-										Caisse pas faite
-									</StyledTypo>
-								</Box>
-								<Divider />
-								<Box
+										{ratioComparedToRevenue(
+											globalRevenue,
+											globalSalaryExpenses
+										)}
+										%
+									</Typography>
+								</StyledTypo>
+							</Paper>
+							<Paper
+								elevation={2}
+								sx={{
+									background: displayScoreColor(
+										ratioComparedToRevenue(globalRevenue, globalOrdersExpenses)
+									),
+								}}
+							>
+								<StyledTypo
 									sx={{
-										margin: "1em",
+										padding: "1em",
 									}}
 								>
-									<StyledTypo>Chiffre d'affaires: </StyledTypo>
-									<StyledTypo
+									Commandes:{" "}
+									<Typography
+										variant="span"
 										sx={{
+											display: "block",
 											fontWeight: "bold",
-											fontStyle: "oblique",
+											fontSize: "1.8em",
 										}}
 									>
-										${totalYobattaRevenue}
-									</StyledTypo>
-								</Box>
-								<Divider />
-								<Box
+										{ratioComparedToRevenue(
+											globalRevenue,
+											globalOrdersExpenses
+										)}
+										%
+									</Typography>
+								</StyledTypo>
+							</Paper>
+							<Paper
+								elevation={2}
+								sx={{
+									background: displayScoreColor(
+										ratioComparedToRevenue(globalRevenue, globalOthersExpenses)
+									),
+								}}
+							>
+								<StyledTypo
 									sx={{
-										margin: "1em",
+										padding: "1em",
 									}}
 								>
-									<StyledTypo>Dépenses: </StyledTypo>
-									<StyledTypo
+									Autres frais:{" "}
+									<Typography
+										variant="span"
 										sx={{
+											display: "block",
 											fontWeight: "bold",
-											fontStyle: "oblique",
+											fontSize: "1.8em",
 										}}
 									>
-										$ {totalYobattaExpenses}
-									</StyledTypo>
-								</Box>
-							</Box>
-							<Box>
-								<HomeBarRevenue
-									dataLabel={dataLabel}
-									dataNumbers={yobattaDataNumbers}
-									backgroundColor={yobattaBackgroundColor}
-								/>
-							</Box>
+										{ratioComparedToRevenue(
+											globalRevenue,
+											globalOthersExpenses
+										)}
+										%
+									</Typography>
+								</StyledTypo>
+							</Paper>
 						</Box>
-					</Paper>
-					{/* <Box>
+						<Box
+							sx={{
+								margin: "1em 0",
+							}}
+						>
+							<Paper>
+								<Box
+									sx={{
+										background: "#FFD702",
+										borderTopLeftRadius: "4px",
+										borderTopRightRadius: "4px",
+									}}
+								>
+									<Typography
+										sx={{
+											fontWeight: "bold",
+											padding: "0.5em",
+											fontSize: "1.3em",
+										}}
+									>
+										Restaurant Attaboy pizza inc.
+									</Typography>
+								</Box>
+								<Box
+									sx={{
+										padding: "1em",
+										display: "flex",
+										justifyContent: "space-around",
+									}}
+								>
+									<Box
+										sx={{
+											width: "40%",
+										}}
+									>
+										{/* <Box
+											sx={{
+												margin: "1em",
+											}}
+										>
+											<StyledTypo>Chiffre d'affaires d'hier: </StyledTypo>
+											<StyledTypo
+												sx={{
+													fontWeight: "bold",
+													fontStyle: "oblique",
+												}}
+											>
+												Caisse pas faite
+											</StyledTypo>
+										</Box>
+										<Divider /> */}
+										<Box
+											sx={{
+												margin: "1em",
+											}}
+										>
+											<StyledTypo>Chiffre d'affaires: </StyledTypo>
+											<StyledTypo
+												sx={{
+													fontWeight: "bold",
+													fontStyle: "oblique",
+												}}
+											>
+												${totalAttaboyRevenue}
+											</StyledTypo>
+										</Box>
+										<Divider />
+										<Box
+											sx={{
+												margin: "1em",
+											}}
+										>
+											<StyledTypo>Dépenses: </StyledTypo>
+											<StyledTypo
+												sx={{
+													fontWeight: "bold",
+													fontStyle: "oblique",
+												}}
+											>
+												${totalAttaboyExpenses}
+											</StyledTypo>
+										</Box>
+									</Box>
+									<Box>
+										<HomeBarRevenue
+											dataLabel={dataLabel}
+											dataNumbers={attaboyDataNumbers}
+											backgroundColor={attaboyBackgroundColor}
+										/>
+									</Box>
+								</Box>
+							</Paper>
+						</Box>
+						<Divider />
+						<Box
+							sx={{
+								margin: "1em 0",
+							}}
+						>
+							<Paper>
+								<Box
+									sx={{
+										background: "#3C6843",
+										borderTopLeftRadius: "4px",
+										borderTopRightRadius: "4px",
+									}}
+								>
+									<Typography
+										sx={{
+											fontWeight: "bold",
+											padding: "0.5em",
+											fontSize: "1.3em",
+											textAlign: "right",
+										}}
+									>
+										Restaurant Ficelle inc.
+									</Typography>
+								</Box>
+								<Box
+									sx={{
+										padding: "1em",
+										display: "flex",
+										justifyContent: "space-around",
+									}}
+								>
+									<Box>
+										<HomeBarRevenue
+											dataLabel={dataLabel}
+											dataNumbers={ficelleDataNumbers}
+											backgroundColor={ficelleBackgroundColor}
+										/>
+									</Box>
+									<Box
+										sx={{
+											width: "40%",
+											textAlign: "right",
+										}}
+									>
+										{/* <Box
+											sx={{
+												margin: "1em",
+											}}
+										>
+											<StyledTypo>Chiffre d'affaires d'hier: </StyledTypo>
+											<StyledTypo
+												sx={{
+													fontWeight: "bold",
+													fontStyle: "oblique",
+												}}
+											>
+												Caisse pas faite
+											</StyledTypo>
+										</Box>
+										<Divider /> */}
+										<Box
+											sx={{
+												margin: "1em",
+											}}
+										>
+											<StyledTypo>Chiffre d'affaires: </StyledTypo>
+											<StyledTypo
+												sx={{
+													fontWeight: "bold",
+													fontStyle: "oblique",
+												}}
+											>
+												${totalFicelleRevenue}
+											</StyledTypo>
+										</Box>
+										<Divider />
+										<Box
+											sx={{
+												margin: "1em",
+											}}
+										>
+											<StyledTypo>Dépenses: </StyledTypo>
+											<StyledTypo
+												sx={{
+													fontWeight: "bold",
+													fontStyle: "oblique",
+												}}
+											>
+												$ {totalFicelleExpenses}
+											</StyledTypo>
+										</Box>
+									</Box>
+								</Box>
+							</Paper>
+						</Box>
+						<Divider />
+						<Box
+							sx={{
+								margin: "1em 0",
+							}}
+						>
+							<Paper>
+								<Box
+									sx={{
+										background: "#D55D8D",
+										borderTopLeftRadius: "4px",
+										borderTopRightRadius: "4px",
+									}}
+								>
+									<Typography
+										sx={{
+											fontWeight: "bold",
+											padding: "0.5em",
+											fontSize: "1.3em",
+										}}
+									>
+										Yobatta sucrerie de quartier inc.
+									</Typography>
+								</Box>
+								<Box
+									sx={{
+										padding: "1em",
+										display: "flex",
+										justifyContent: "space-around",
+									}}
+								>
+									<Box
+										sx={{
+											width: "40%",
+										}}
+									>
+										{/* <Box
+											sx={{
+												margin: "1em",
+											}}
+										>
+											<StyledTypo>Chiffre d'affaires d'hier: </StyledTypo>
+											<StyledTypo
+												sx={{
+													fontWeight: "bold",
+													fontStyle: "oblique",
+												}}
+											>
+												Caisse pas faite
+											</StyledTypo>
+										</Box>
+										<Divider /> */}
+										<Box
+											sx={{
+												margin: "1em",
+											}}
+										>
+											<StyledTypo>Chiffre d'affaires: </StyledTypo>
+											<StyledTypo
+												sx={{
+													fontWeight: "bold",
+													fontStyle: "oblique",
+												}}
+											>
+												${totalYobattaRevenue}
+											</StyledTypo>
+										</Box>
+										<Divider />
+										<Box
+											sx={{
+												margin: "1em",
+											}}
+										>
+											<StyledTypo>Dépenses: </StyledTypo>
+											<StyledTypo
+												sx={{
+													fontWeight: "bold",
+													fontStyle: "oblique",
+												}}
+											>
+												$ {totalYobattaExpenses}
+											</StyledTypo>
+										</Box>
+									</Box>
+									<Box>
+										<HomeBarRevenue
+											dataLabel={dataLabel}
+											dataNumbers={yobattaDataNumbers}
+											backgroundColor={yobattaBackgroundColor}
+										/>
+									</Box>
+								</Box>
+							</Paper>
+							{/* <Box>
 						<BarRevenue dataLabel={dataLabel} dataNumbers={dataNumbers} />
 					</Box> */}
-				</Box>
-				{/* <Box
-					sx={{
-						display: "flex",
-						justifyContent: "space-evenly",
-						alignItems: "center",
-						margin: "1em 0",
-					}}
-				>
-					<Paper>
-						<Box
-							sx={{
-								background: "#D55D8D",
-								borderTopLeftRadius: "4px",
-								borderTopRightRadius: "4px",
-							}}
-						>
-							<Typography
-								sx={{
-									fontWeight: "bold",
-									padding: "0.5em",
-									fontSize: "1.3em",
-								}}
-							>
-								Yobatta
-							</Typography>
 						</Box>
-						<Box
-							sx={{
-								padding: "1em",
-							}}
-						>
-							<Box
-								sx={{
-									margin: "1em",
-								}}
-							>
-								<StyledTypo>
-									Chiffre d'affaires d'hier:{" "}
-									<Typography
-										variant="span"
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										Caisse pas faite
-									</Typography>
-								</StyledTypo>
-							</Box>
-							<Divider />
-							<Box
-								sx={{
-									margin: "1em",
-								}}
-							>
-								<StyledTypo>
-									Chiffre d'affaires:{" "}
-									<Typography
-										variant="span"
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										${yobattaRevenue}
-									</Typography>
-								</StyledTypo>
-							</Box>
-							<Divider />
-							<Box
-								sx={{
-									margin: "1em",
-								}}
-							>
-								<StyledTypo>
-									Dépenses:{" "}
-									<Typography
-										variant="span"
-										sx={{
-											fontWeight: "bold",
-											fontStyle: "oblique",
-										}}
-									>
-										${totalExpenses}
-									</Typography>
-								</StyledTypo>
-							</Box>
-						</Box>
-					</Paper>
-					<Box>
-						<BarRevenue dataLabel={dataLabel} dataNumbers={dataNumbers} />
 					</Box>
-				</Box> */}
-				{/* <Box>
-					<Paper elevation={8}>
-						<Box
-							sx={{
-								background: colorTheme,
-								borderTopLeftRadius: "4px",
-								borderTopRightRadius: "4px",
-							}}
-						>
-							<Typography
-								sx={{
-									padding: "1em",
-								}}
-							>
-								Attaboy
-							</Typography>
-						</Box>
-						<Divider />
-						<Box
-							sx={{
-								display: "flex",
-								justifyContent: "space-evenly",
-								textAlign: "center",
-							}}
-						>
-							<Box
-								sx={{
-									width: "30%",
-								}}
-							>
-								<StyledTypo>Chiffre d'affaires hier:</StyledTypo>
-								<StyledTypo>Caisse pas faite</StyledTypo>
-							</Box>
-							<Box
-								sx={{
-									width: "30%",
-								}}
-							>
-								<StyledTypo>Chiffre d'affaires :</StyledTypo>
-								<StyledTypo>${revenue}</StyledTypo>
-							</Box>
-							<Box
-								sx={{
-									width: "30%",
-								}}
-							>
-								<StyledTypo>Dépenses:</StyledTypo>
-								<StyledTypo>${totalExpenses}</StyledTypo>
-							</Box>
-						</Box>
-					</Paper>
-					<Paper elevation={8}>
-						<Box
-							sx={{
-								background: "#3C6843",
-								borderTopLeftRadius: "4px",
-								borderTopRightRadius: "4px",
-							}}
-						>
-							<Typography
-								sx={{
-									padding: "1em",
-								}}
-							>
-								Ficelle
-							</Typography>
-						</Box>
-						<Divider />
-						<Box
-							sx={{
-								display: "flex",
-								justifyContent: "space-evenly",
-								textAlign: "center",
-								alignItems: "center",
-							}}
-						>
-							<Box
-								sx={{
-									width: "30%",
-								}}
-							>
-								<StyledTypo>Chiffre d'affaires hier:</StyledTypo>
-								<StyledTypo>$12586</StyledTypo>
-							</Box>
-							<Box
-								sx={{
-									width: "30%",
-								}}
-							>
-								<StyledTypo>Chiffre d'affaires :</StyledTypo>
-								<StyledTypo>${revenue}</StyledTypo>
-							</Box>
-							<Box
-								sx={{
-									width: "30%",
-								}}
-							>
-								<StyledTypo>Dépenses:</StyledTypo>
-								<StyledTypo>${totalExpenses}</StyledTypo>
-							</Box>
-						</Box>
-					</Paper>
-				</Box> */}
+				) : null}
 			</Container>
 		</div>
 	);

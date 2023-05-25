@@ -1,38 +1,33 @@
+import React, { useContext, useEffect, useState } from "react";
 import { Box, Typography, Divider } from "@mui/material";
 import styled from "@emotion/styled";
-// import {
-// 	collection,
-// 	query,
-// 	where,
-// 	getDocs,
-// 	onSnapshot,
-// } from "firebase/firestore";
-// import { db } from "../firebaseConfig";
-import React, { useContext, useEffect, useState } from "react";
+
 import {
 	displayScoreColor,
 	ratioComparedToRevenue,
 	getLastDayRevenue,
 } from "../data/generalFonctions";
 import { HomeBarRevenue } from "./charts/BarChart";
-import { PeriodContext, RestaurantContext, ThemeContext } from "../App";
+import { RestaurantContext, ThemeContext } from "../App";
 
-function AttaboyOverview(props) {
-	const [activeRestaurant] = useContext(RestaurantContext);
+function YobattaOverview(props) {
 	const {
-		totalAttaboyRevenue,
-		totalAttaboyExpenses,
-		attaboySalary,
-		attaboyOrders,
-		attaboyOthers,
+		totalYobattaRevenue,
+		totalYobattaExpenses,
+		yobattaSalary,
+		yobattaOrders,
+		yobattaOthers,
 	} = props;
+	const [activeRestaurant] = useContext(RestaurantContext);
+	const [colorTheme] = useContext(ThemeContext);
+	const [lastDailyRevenue, setLastDailyRevenue] = useState();
+	const yobattaDataNumbers = [totalYobattaRevenue, totalYobattaExpenses];
+	const yobattaBackgroundColor = ["#D55D8D", "#922651"];
+	const dataLabel = ["revenus", "depenses"];
 	const StyledTypo = styled(Typography)(({ theme }) => ({
 		fontSize: "1.2em",
 	}));
-	const [lastDailyRevenue, setLastDailyRevenue] = useState();
-	const dataLabel = ["revenus", "depenses"];
-	const attaboyBackgroundColor = ["#FFD702", "#FFEA70"];
-	const attaboyDataNumbers = [totalAttaboyRevenue, totalAttaboyExpenses];
+
 	useEffect(() => {
 		const date = new Date();
 		const currentYear = new Date().getFullYear();
@@ -71,11 +66,11 @@ function AttaboyOverview(props) {
 								fontWeight: "bold",
 								fontStyle: "oblique",
 								"&.MuiTypography-root": {
-									color: "#e0bf00",
+									color: colorTheme,
 								},
 							}}
 						>
-							$ {totalAttaboyRevenue}
+							$ {totalYobattaRevenue}
 						</StyledTypo>
 					</Box>
 					<Box
@@ -89,19 +84,19 @@ function AttaboyOverview(props) {
 								fontWeight: "bold",
 								fontStyle: "oblique",
 								"&.MuiTypography-root": {
-									color: "#e0bf00",
+									color: colorTheme,
 								},
 							}}
 						>
-							$ {totalAttaboyExpenses}
+							$ {totalYobattaExpenses}
 						</StyledTypo>
 					</Box>
 				</Box>
 				<Box>
 					<HomeBarRevenue
 						dataLabel={dataLabel}
-						dataNumbers={attaboyDataNumbers}
-						backgroundColor={attaboyBackgroundColor}
+						dataNumbers={yobattaDataNumbers}
+						backgroundColor={yobattaBackgroundColor}
 					/>
 				</Box>
 			</Box>
@@ -120,9 +115,9 @@ function AttaboyOverview(props) {
 					<Typography
 						variant="span"
 						sx={{
-							color: "#e0bf00",
 							fontStyle: "oblique",
 							fontWeight: "bold",
+							color: colorTheme,
 						}}
 					>
 						{lastDailyRevenue === 0
@@ -148,21 +143,21 @@ function AttaboyOverview(props) {
 						<Typography
 							variant="span"
 							sx={{
-								color: "#e0bf00",
+								color: colorTheme,
 							}}
 						>
-							${attaboySalary}
+							${yobattaSalary}
 						</Typography>{" "}
 						-{" "}
 						<StyledTypo
 							variant="span"
 							sx={{
 								color: displayScoreColor(
-									ratioComparedToRevenue(totalAttaboyRevenue, attaboySalary)
+									ratioComparedToRevenue(totalYobattaRevenue, yobattaSalary)
 								),
 							}}
 						>
-							{ratioComparedToRevenue(totalAttaboyRevenue, attaboySalary)}%
+							{ratioComparedToRevenue(totalYobattaRevenue, yobattaSalary)}%
 						</StyledTypo>{" "}
 						du CA
 					</StyledTypo>
@@ -177,21 +172,21 @@ function AttaboyOverview(props) {
 						<Typography
 							variant="span"
 							sx={{
-								color: "#e0bf00",
+								color: colorTheme,
 							}}
 						>
-							${attaboyOrders}
+							${yobattaOrders}
 						</Typography>{" "}
 						-{" "}
 						<StyledTypo
 							variant="span"
 							sx={{
 								color: displayScoreColor(
-									ratioComparedToRevenue(totalAttaboyRevenue, attaboyOrders)
+									ratioComparedToRevenue(totalYobattaRevenue, yobattaOrders)
 								),
 							}}
 						>
-							{ratioComparedToRevenue(totalAttaboyRevenue, attaboyOrders)}%
+							{ratioComparedToRevenue(totalYobattaRevenue, yobattaOrders)}%
 						</StyledTypo>{" "}
 						du CA
 					</StyledTypo>
@@ -206,38 +201,24 @@ function AttaboyOverview(props) {
 						<Typography
 							variant="span"
 							sx={{
-								color: "#e0bf00",
+								color: colorTheme,
 							}}
 						>
-							${attaboyOthers}
+							${yobattaOthers}
 						</Typography>{" "}
 						-{" "}
 						<StyledTypo
 							variant="span"
 							sx={{
 								color: displayScoreColor(
-									ratioComparedToRevenue(totalAttaboyRevenue, attaboyOthers)
+									ratioComparedToRevenue(totalYobattaRevenue, yobattaOthers)
 								),
 							}}
 						>
-							{ratioComparedToRevenue(totalAttaboyRevenue, attaboyOthers)}%
+							{ratioComparedToRevenue(totalYobattaRevenue, yobattaOthers)}%
 						</StyledTypo>{" "}
 						du CA
 					</StyledTypo>
-
-					{/* <StyledTypo>
-						<StyledTypo
-							variant="span"
-							sx={{
-								color: displayScoreColor(
-									ratioComparedToRevenue(totalAttaboyRevenue, attaboyOthers)
-								),
-							}}
-						>
-							{ratioComparedToRevenue(totalAttaboyRevenue, attaboyOthers)}%
-						</StyledTypo>{" "}
-						du CA
-					</StyledTypo> */}
 				</Box>
 			</Box>
 			<Divider />
@@ -256,4 +237,4 @@ function AttaboyOverview(props) {
 	);
 }
 
-export default AttaboyOverview;
+export default YobattaOverview;

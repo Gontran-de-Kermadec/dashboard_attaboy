@@ -1,38 +1,33 @@
+import React, { useContext, useEffect, useState } from "react";
 import { Box, Typography, Divider } from "@mui/material";
 import styled from "@emotion/styled";
-// import {
-// 	collection,
-// 	query,
-// 	where,
-// 	getDocs,
-// 	onSnapshot,
-// } from "firebase/firestore";
-// import { db } from "../firebaseConfig";
-import React, { useContext, useEffect, useState } from "react";
+
 import {
 	displayScoreColor,
 	ratioComparedToRevenue,
 	getLastDayRevenue,
 } from "../data/generalFonctions";
 import { HomeBarRevenue } from "./charts/BarChart";
-import { PeriodContext, RestaurantContext, ThemeContext } from "../App";
+import { RestaurantContext, ThemeContext } from "../App";
 
-function AttaboyOverview(props) {
-	const [activeRestaurant] = useContext(RestaurantContext);
+function FicelleOverview(props) {
 	const {
-		totalAttaboyRevenue,
-		totalAttaboyExpenses,
-		attaboySalary,
-		attaboyOrders,
-		attaboyOthers,
+		totalFicelleRevenue,
+		totalFicelleExpenses,
+		ficelleSalary,
+		ficelleOrders,
+		ficelleOthers,
 	} = props;
+	const [activeRestaurant] = useContext(RestaurantContext);
+	const [colorTheme] = useContext(ThemeContext);
+	const [lastDailyRevenue, setLastDailyRevenue] = useState();
+	const ficelleDataNumbers = [totalFicelleRevenue, totalFicelleExpenses];
+	const ficelleBackgroundColor = ["#3C6843", "#71AD79"];
+	const dataLabel = ["revenus", "depenses"];
 	const StyledTypo = styled(Typography)(({ theme }) => ({
 		fontSize: "1.2em",
 	}));
-	const [lastDailyRevenue, setLastDailyRevenue] = useState();
-	const dataLabel = ["revenus", "depenses"];
-	const attaboyBackgroundColor = ["#FFD702", "#FFEA70"];
-	const attaboyDataNumbers = [totalAttaboyRevenue, totalAttaboyExpenses];
+
 	useEffect(() => {
 		const date = new Date();
 		const currentYear = new Date().getFullYear();
@@ -71,11 +66,11 @@ function AttaboyOverview(props) {
 								fontWeight: "bold",
 								fontStyle: "oblique",
 								"&.MuiTypography-root": {
-									color: "#e0bf00",
+									color: colorTheme,
 								},
 							}}
 						>
-							$ {totalAttaboyRevenue}
+							$ {totalFicelleRevenue}
 						</StyledTypo>
 					</Box>
 					<Box
@@ -89,19 +84,19 @@ function AttaboyOverview(props) {
 								fontWeight: "bold",
 								fontStyle: "oblique",
 								"&.MuiTypography-root": {
-									color: "#e0bf00",
+									color: colorTheme,
 								},
 							}}
 						>
-							$ {totalAttaboyExpenses}
+							$ {totalFicelleExpenses}
 						</StyledTypo>
 					</Box>
 				</Box>
 				<Box>
 					<HomeBarRevenue
 						dataLabel={dataLabel}
-						dataNumbers={attaboyDataNumbers}
-						backgroundColor={attaboyBackgroundColor}
+						dataNumbers={ficelleDataNumbers}
+						backgroundColor={ficelleBackgroundColor}
 					/>
 				</Box>
 			</Box>
@@ -120,9 +115,9 @@ function AttaboyOverview(props) {
 					<Typography
 						variant="span"
 						sx={{
-							color: "#e0bf00",
 							fontStyle: "oblique",
 							fontWeight: "bold",
+							color: colorTheme,
 						}}
 					>
 						{lastDailyRevenue === 0
@@ -148,21 +143,21 @@ function AttaboyOverview(props) {
 						<Typography
 							variant="span"
 							sx={{
-								color: "#e0bf00",
+								color: colorTheme,
 							}}
 						>
-							${attaboySalary}
+							${ficelleSalary}
 						</Typography>{" "}
 						-{" "}
 						<StyledTypo
 							variant="span"
 							sx={{
 								color: displayScoreColor(
-									ratioComparedToRevenue(totalAttaboyRevenue, attaboySalary)
+									ratioComparedToRevenue(totalFicelleRevenue, ficelleSalary)
 								),
 							}}
 						>
-							{ratioComparedToRevenue(totalAttaboyRevenue, attaboySalary)}%
+							{ratioComparedToRevenue(totalFicelleRevenue, ficelleSalary)}%
 						</StyledTypo>{" "}
 						du CA
 					</StyledTypo>
@@ -177,21 +172,21 @@ function AttaboyOverview(props) {
 						<Typography
 							variant="span"
 							sx={{
-								color: "#e0bf00",
+								color: colorTheme,
 							}}
 						>
-							${attaboyOrders}
+							${ficelleOrders}
 						</Typography>{" "}
 						-{" "}
 						<StyledTypo
 							variant="span"
 							sx={{
 								color: displayScoreColor(
-									ratioComparedToRevenue(totalAttaboyRevenue, attaboyOrders)
+									ratioComparedToRevenue(totalFicelleRevenue, ficelleOrders)
 								),
 							}}
 						>
-							{ratioComparedToRevenue(totalAttaboyRevenue, attaboyOrders)}%
+							{ratioComparedToRevenue(totalFicelleRevenue, ficelleOrders)}%
 						</StyledTypo>{" "}
 						du CA
 					</StyledTypo>
@@ -206,38 +201,24 @@ function AttaboyOverview(props) {
 						<Typography
 							variant="span"
 							sx={{
-								color: "#e0bf00",
+								color: colorTheme,
 							}}
 						>
-							${attaboyOthers}
+							${ficelleOthers}
 						</Typography>{" "}
 						-{" "}
 						<StyledTypo
 							variant="span"
 							sx={{
 								color: displayScoreColor(
-									ratioComparedToRevenue(totalAttaboyRevenue, attaboyOthers)
+									ratioComparedToRevenue(totalFicelleRevenue, ficelleOthers)
 								),
 							}}
 						>
-							{ratioComparedToRevenue(totalAttaboyRevenue, attaboyOthers)}%
+							{ratioComparedToRevenue(totalFicelleRevenue, ficelleOthers)}%
 						</StyledTypo>{" "}
 						du CA
 					</StyledTypo>
-
-					{/* <StyledTypo>
-						<StyledTypo
-							variant="span"
-							sx={{
-								color: displayScoreColor(
-									ratioComparedToRevenue(totalAttaboyRevenue, attaboyOthers)
-								),
-							}}
-						>
-							{ratioComparedToRevenue(totalAttaboyRevenue, attaboyOthers)}%
-						</StyledTypo>{" "}
-						du CA
-					</StyledTypo> */}
 				</Box>
 			</Box>
 			<Divider />
@@ -256,4 +237,4 @@ function AttaboyOverview(props) {
 	);
 }
 
-export default AttaboyOverview;
+export default FicelleOverview;

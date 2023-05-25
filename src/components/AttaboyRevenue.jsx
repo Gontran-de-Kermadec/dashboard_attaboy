@@ -12,6 +12,7 @@ import { db } from "../firebaseConfig";
 import { Paper, Typography, Box, Divider } from "@mui/material";
 import { BarRevenue } from "../components/charts/BarChart";
 import PieChart from "../components/charts/PieChart";
+import { getLastDayRevenue } from "../data/generalFonctions";
 // import { todayDate } from "../data/getData";
 
 function AttaboyRevenue() {
@@ -279,31 +280,36 @@ function AttaboyRevenue() {
 	}, [activePeriod, activeRestaurant]);
 	useEffect(() => {
 		const date = new Date();
-		//console.log(date.getDate() - 1);
 		const currentYear = new Date().getFullYear();
 		const previousDay = new Date(
 			date.getFullYear(),
 			date.getMonth(),
 			date.getDate() - 1
 		);
-		const lastDayRequest = query(
-			collection(db, `ventes/${activeRestaurant}/${currentYear}`),
-			where("timestamp", "==", previousDay)
+		getLastDayRevenue(
+			activeRestaurant,
+			currentYear,
+			previousDay,
+			setLastDailyRevenue
 		);
-		let lastDayRevenue = 0;
-		console.log(lastDayRequest);
-		onSnapshot(lastDayRequest, (querySnapshot) => {
-			if (querySnapshot.empty) {
-				console.log("pas de revenus hier");
-				setLastDailyRevenue(0);
-			} else {
-				querySnapshot.forEach((doc) => {
-					console.log(doc.data().sourcesOfRevenues);
-					lastDayRevenue = doc.data().total;
-				});
-				setLastDailyRevenue(lastDayRevenue);
-			}
-		});
+		// const lastDayRequest = query(
+		// 	collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+		// 	where("timestamp", "==", previousDay)
+		// );
+		// let lastDayRevenue = 0;
+		// console.log(lastDayRequest);
+		// onSnapshot(lastDayRequest, (querySnapshot) => {
+		// 	if (querySnapshot.empty) {
+		// 		console.log("pas de revenus hier");
+		// 		setLastDailyRevenue(0);
+		// 	} else {
+		// 		querySnapshot.forEach((doc) => {
+		// 			console.log(doc.data().sourcesOfRevenues);
+		// 			lastDayRevenue = doc.data().total;
+		// 		});
+		// 		setLastDailyRevenue(lastDayRevenue);
+		// 	}
+		// });
 	}, [activeRestaurant]);
 	console.log(revenueMonthsBefore);
 	useEffect(() => {

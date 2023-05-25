@@ -13,7 +13,8 @@ export const RestaurantContext = createContext();
 export const ThemeContext = createContext();
 
 function App() {
-	const attaboyTheme = "#FFD702";
+	const soguaresTheme = "#b4a693";
+	const attaboyTheme = "#e0bf00";
 	const ficelleTheme = "#3C6843";
 	const yobattaTheme = "#D55D8D";
 	const [activePeriod, setActivePeriod] = useState("annee");
@@ -23,16 +24,16 @@ function App() {
 	useEffect(() => {
 		const changeTheme = () => {
 			switch (activeRestaurant) {
+				case "soguares":
+					setColorTheme(soguaresTheme);
+					break;
 				case "attaboy":
-					//setColor("#FFD702");
 					setColorTheme(attaboyTheme);
 					break;
 				case "ficelle":
-					//setColor("#3C6843");
 					setColorTheme(ficelleTheme);
 					break;
 				case "yobatta":
-					//setColor("#D55D8D");
 					setColorTheme(yobattaTheme);
 					break;
 				default:

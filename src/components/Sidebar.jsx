@@ -17,6 +17,8 @@ import {
 import { Link } from "react-router-dom";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { RestaurantContext, ThemeContext } from "../App";
+import { hex2rgba } from "../data/generalFonctions";
+
 // import { useNavigate, Link } from "react-router-dom";
 
 function Sidebar() {
@@ -149,7 +151,14 @@ function Sidebar() {
 										{item.title}
 									</Typography>
 									{item.section.map((item, index) => (
-										<ListItemButton key={index}>
+										<ListItemButton
+											key={index}
+											sx={{
+												"&:hover": {
+													background: hex2rgba(colorTheme, 0.2),
+												},
+											}}
+										>
 											<Link
 												to={`/${item}`}
 												style={{
@@ -167,7 +176,13 @@ function Sidebar() {
 								</>
 							) : (
 								<>
-									<ListItemButton>
+									<ListItemButton
+										sx={{
+											"&:hover": {
+												background: hex2rgba(colorTheme, 0.2),
+											},
+										}}
+									>
 										<Link
 											to={item.path}
 											style={{

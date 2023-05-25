@@ -29,7 +29,7 @@ function FicelleRevenue() {
 
 	const [labels, setLabels] = useState();
 	const [sourcesRevenue, setSourcesRevenue] = useState();
-	const ficelleBackgroundColor = ["#3C6843", "#71AD79"];
+	const ficelleBackgroundColor = ["#3C6843", "#71AD79", "#528E5C", "#0F1A11"];
 
 	const Item = styled(Paper)(({ theme }) => ({
 		textAlign: "center",
@@ -97,10 +97,10 @@ function FicelleRevenue() {
 		onSnapshot(q, (querySnapshot) => {
 			querySnapshot.forEach((doc) => {
 				total += doc.data().total;
-				uberTotal += doc.data().uber;
-				tpvTotal += doc.data().tpv;
-				argentTotal += doc.data().argent;
-				doordashTotal += doc.data().doordash;
+				uberTotal += doc.data().sourcesOfRevenues.uber;
+				tpvTotal += doc.data().sourcesOfRevenues.tpv;
+				argentTotal += doc.data().sourcesOfRevenues.argent;
+				doordashTotal += doc.data().sourcesOfRevenues.doordash;
 			});
 			setUberRevenue(Math.round(uberTotal));
 			setTpvRevenue(Math.round(tpvTotal));
@@ -113,7 +113,7 @@ function FicelleRevenue() {
 				uber: uberTotal,
 				doordash: doordashTotal,
 			});
-			console.log(total);
+			console.log(argentTotal);
 		});
 	}, [activePeriod, activeRestaurant]);
 	useEffect(() => {
@@ -226,7 +226,11 @@ function FicelleRevenue() {
 					/>
 				</Box>
 				<Box>
-					<PieChart dataLabel={labels} dataNumbers={sourcesRevenue} />
+					<PieChart
+						dataLabel={labels}
+						dataNumbers={sourcesRevenue}
+						colors={ficelleBackgroundColor}
+					/>
 				</Box>
 			</Box>
 		</>

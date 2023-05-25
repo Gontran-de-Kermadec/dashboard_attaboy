@@ -206,7 +206,11 @@ function YobattaRevenue() {
 						/>
 					</Box>
 					<Box>
-						<PieChart dataLabel={labels} dataNumbers={sourcesRevenue} />
+						<PieChart
+							dataLabel={labels}
+							dataNumbers={sourcesRevenue}
+							colors={yobattaBackgroundColor}
+						/>
 					</Box>
 				</Box>
 			</Box>

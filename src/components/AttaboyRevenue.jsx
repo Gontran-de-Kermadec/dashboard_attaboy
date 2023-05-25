@@ -42,6 +42,15 @@ function AttaboyRevenue() {
 	const [finalCount, setFinalCount] = useState([]);
 	const [finalMonthArray, setFinalMotnhArray] = useState([]);
 
+	const attaboyBackgroundColor = [
+		"#B89C00",
+		"#E0BF00",
+		"#FFE033",
+		"#FFDA0A",
+		"#FFEA70",
+		"#F0D01A",
+	];
+
 	const Item = styled(Paper)(({ theme }) => ({
 		textAlign: "center",
 		width: "25%",
@@ -513,7 +522,11 @@ function AttaboyRevenue() {
 					<BarRevenue dataLabel={labels} dataNumbers={allRevenue} />
 				</Box>
 				<div>
-					<PieChart dataLabel={labels} dataNumbers={allRevenue} />
+					<PieChart
+						dataLabel={labels}
+						dataNumbers={allRevenue}
+						colors={attaboyBackgroundColor}
+					/>
 				</div>
 			</Box>
 			<Divider />

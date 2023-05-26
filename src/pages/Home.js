@@ -147,10 +147,10 @@ function Home() {
 			date.getMonth(),
 			date.getDate()
 		);
-		const year = new Date(date.getFullYear(), 0, 1);
-		const days = Math.floor((date - year) / (24 * 60 * 60 * 1000));
-		const week = Math.ceil((date.getDay() + 1 + days) / 7);
-		console.log(week);
+		//const year = new Date(date.getFullYear(), 0, 1);
+		//const days = Math.floor((date - year) / (24 * 60 * 60 * 1000));
+		//const week = Math.ceil((date.getDay() + 1 + days) / 7);
+		//console.log(week);
 
 		if (activePeriod === "annee") {
 			startDate = new Date(currentYear, 0, 1); //current year

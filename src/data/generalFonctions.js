@@ -54,3 +54,18 @@ export const hex2rgba = (hex, alpha = 1) => {
 	const [r, g, b] = hex.match(/\w\w/g).map((x) => parseInt(x, 16));
 	return `rgba(${r},${g},${b},${alpha})`;
 };
+
+export const removeTaxes = (amount) => {
+	return amount - amount * (15 / 100);
+};
+export const removeUberFees = (amount) => {
+	const minusFees = amount - amount * (30 / 100);
+	const minusTaxes = minusFees - minusFees * (15 / 100);
+	return minusTaxes;
+};
+export const removeDoordashFees = (amount) => {
+	return amount - amount * (25 / 100);
+};
+export const removeRestoLocoFees = (amount) => {
+	return amount - amount * (20 / 100);
+};

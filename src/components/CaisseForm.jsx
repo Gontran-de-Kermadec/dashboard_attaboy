@@ -23,6 +23,12 @@ import {
 	onSnapshot,
 	updateDoc,
 } from "firebase/firestore";
+import {
+	removeDoordashFees,
+	removeRestoLocoFees,
+	removeTaxes,
+	removeUberFees,
+} from "../data/generalFonctions";
 
 const CustomButton = styled(Button)`
 	display: block;
@@ -73,9 +79,10 @@ function CaisseForm() {
 
 	//label input
 
-	const removeTaxes = (amount) => {
-		return amount - amount * (15 / 100);
-	};
+	// const removeTaxes = (amount) => {
+	// 	return amount - amount * (15 / 100);
+	// };
+
 	const tipsSummary = {
 		date: date,
 		tpv: tpvTips,
@@ -94,11 +101,11 @@ function CaisseForm() {
 			// argent: argentNumber,
 			tpv: removeTaxes(tpvNumber),
 			// tpv: tpvNumber,
-			wix: wixNumber,
-			restoloco: restoNumber,
-			uber: removeTaxes(uberNumber),
+			wix: wixNumber, //subtotal so no taxes
+			restoloco: removeRestoLocoFees(restoNumber),
+			uber: removeUberFees(uberNumber),
 			// uber: uberNumber,
-			doordash: doordashNumber,
+			doordash: removeDoordashFees(doordashNumber),
 		},
 		tips: totalTips,
 	};
@@ -141,7 +148,6 @@ function CaisseForm() {
 		const doordashAmount =
 			doordashTips === undefined ? Number(0) : doordashTips;
 		const restoAmount = restoTips === undefined ? Number(0) : restoTips;
-
 		let sum = tpvAmount + wixAmount + uberAmount + doordashAmount + restoAmount;
 		setTotalTips(sum);
 	};
@@ -161,7 +167,6 @@ function CaisseForm() {
 
 		if (day < 10) day = "0" + day;
 		if (month < 10) month = "0" + month;
-
 		const formattedDate = new Date(month + "/" + day + "/" + year);
 		console.log(formattedDate);
 		setSelectedDate(formattedDate);
@@ -170,17 +175,6 @@ function CaisseForm() {
 		setTimeStampDate(testDate);
 		setError(false);
 	};
-
-	// firebase queries
-	// const checkingrequest = query(
-	// 	collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
-	// 	where("timestamp", "==", selectedDate)
-	// );
-	// const dataAlreadyExist = async () => {
-	// 	const checkingrequest = query(
-	// 		collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
-	// 		where("timestamp", "==", selectedDate)
-	// 	);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -212,29 +206,6 @@ function CaisseForm() {
 				window.location.reload();
 			});
 		}
-		// querySnapshot.forEach((doc) => {
-		// 	// doc.data() is never undefined for query doc snapshots
-		// 	console.log(doc.id, " => ", doc.data());
-		// });
-		// if (timeStampDate === undefined) {
-		// 	setError(true);
-		// 	console.log(error);
-		// 	return;
-		// }
-		// console.log("submitted");
-		// await setDoc(doc(db, "ventes", date), salesSummary);
-		// // const docRef = await addDoc(collection(db, "tips"), tipsSummary);
-		// // console.log("Document written with ID: ", docRef.id);
-		// console.log(activeRestaurant);
-		// const userDoc = await setDoc(
-		// 	docRef,
-		// 	// collection(db, `ventes/${activeRestaurant}/${selectedYear}`),
-		// 	salesSummary
-		// );
-		// console.log("Document written with ID: " + userDoc.id);
-
-		//const testCollection = collection(db, "attaboy", userDoc.id, "ventes");
-		//const subColl = await addDoc(testCollection, salesSummary);
 	};
 	const [error, setError] = React.useState(false);
 	//const helperText = error ? "Selectionner une date" : "";

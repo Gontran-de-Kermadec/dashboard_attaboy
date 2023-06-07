@@ -10,7 +10,6 @@ import { db } from "../firebaseConfig";
 // import InputLabel from "@mui/material/InputLabel";
 // import MenuItem from "@mui/material/MenuItem";
 // import FormControl from "@mui/material/FormControl";
-// import Select from "@mui/material/Select";
 // import Accordion from "@mui/material/Accordion";
 // import AccordionSummary from "@mui/material/AccordionSummary";
 // import AccordionDetails from "@mui/material/AccordionDetails";
@@ -57,6 +56,7 @@ function EmployeeForm({ handleClose }) {
 	const [email, setEmail] = useState("");
 	const [cellNumber, setCellNumber] = useState("");
 	const [nas, setNas] = useState("");
+	const [hourlySalary, setHourlySalary] = useState("");
 	const [familyName, setFamilyName] = useState("");
 	const [name, setName] = useState("");
 	const [relative, setRelative] = useState("");
@@ -84,6 +84,7 @@ function EmployeeForm({ handleClose }) {
 			address: address,
 			cellNumber: cellNumber,
 			nas: nas,
+			hourlySalary: hourlySalary,
 		},
 		emergency_infos: {
 			familyName: capitalize(familyName),
@@ -121,7 +122,6 @@ function EmployeeForm({ handleClose }) {
 
 		const formattedDate = new Date(month + "/" + day + "/" + year);
 		console.log(formattedDate);
-		// setSelectedDate(formattedDate);
 		setBirthDate(month + "/" + day + "/" + year);
 		//const timestampFormat = Timestamp.fromDate(e.$d);
 		//setTimeStampDate(timestampFormat);
@@ -215,6 +215,13 @@ function EmployeeForm({ handleClose }) {
 							id="outlined-required"
 							label="Numero d'assurance sociale"
 							onChange={(e) => setNas(e.target.value)}
+						/>
+					</Box>
+					<Box>
+						<TextField
+							id="outlined-required"
+							label="Salaire"
+							onChange={(e) => setHourlySalary(e.target.value)}
 						/>
 					</Box>
 					<Box

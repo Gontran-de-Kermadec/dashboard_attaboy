@@ -27,6 +27,12 @@
 .App-link {
 	color: #61dafb;
 }
+/* .hover:hover p:nth-child(2) {
+	color: red;
+} */
+/* .hover {
+	color: blue;
+} */
 
 @keyframes App-logo-spin {
 	from {

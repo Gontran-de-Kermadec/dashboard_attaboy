@@ -1,19 +1,42 @@
 import React from "react";
-import { useState, useEffect, useContext } from "react";
-import { PeriodContext, RestaurantContext, ThemeContext } from "../App";
+import { useState, useContext } from "react";
+import { PeriodContext, StartEndDateContext, ThemeContext } from "../App";
 import { Box } from "@mui/system";
 import { Tab, Tabs } from "@mui/material";
 import { styled } from "@mui/material/styles";
-// import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-// import { LocalizationProvider } from "@mui/x-date-pickers";
-// import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-// import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
+import { DatePicker, Space } from "antd";
+import "../index.css";
+
+import { addDays, format } from "date-fns";
+import { DateRange, DayPicker } from "react-day-picker";
+const { RangePicker } = DatePicker;
 
 function Period() {
 	const [activePeriod, setActivePeriod] = useContext(PeriodContext);
-	//const [activeRestaurant] = useContext(RestaurantContext);
+	const [startEndDate, setStartEndDate] = useContext(StartEndDateContext);
 	const [colorTheme] = useContext(ThemeContext);
-	//const [color, setColor] = useState();
+
+	const [startDate, setStartDate] = useState();
+	const [endDate, setEndDate] = useState();
+	const pastMonth = new Date(2020, 10, 15);
+	const defaultSelected = {
+		from: pastMonth,
+		to: addDays(pastMonth, 4),
+	};
+	const [range, setRange] = useState(defaultSelected);
+	let footer = <p>Please pick the first day.</p>;
+	if (range?.from) {
+		if (!range.to) {
+			footer = <p>{format(range.from, "PPP")}</p>;
+		} else if (range.to) {
+			footer = (
+				<p>
+					{format(range.from, "PPP")}–{format(range.to, "PPP")}
+				</p>
+			);
+		}
+	}
+
 	const StyledTab = styled(Tab)({
 		"&.Mui-selected": {
 			color: colorTheme,
@@ -24,11 +47,23 @@ function Period() {
 		console.log(newPeriod);
 		setActivePeriod(newPeriod);
 	};
+	const onChange = (e) => {
+		const start = e[0].$d;
+		const end = e[1].$d;
+		setStartDate(start);
+		setEndDate(end);
+		setStartEndDate([start, end]);
+	};
 
-	console.log(colorTheme);
+	console.log(startEndDate);
 	return (
 		<>
-			<Box>
+			<Box
+				sx={{
+					display: "flex",
+					alignItems: "center",
+				}}
+			>
 				<Tabs
 					value={activePeriod}
 					onChange={handleChange}
@@ -43,16 +78,24 @@ function Period() {
 					<StyledTab value="annee" label="Année" />
 					<StyledTab value="mois" label="Mois" />
 					<StyledTab value="semaine" label="Semaine" />
+					<StyledTab value="custom" label="Personnalisé" />
 				</Tabs>
-			</Box>
-			<Box>
-				{/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-					<DemoContainer components={["DateRangePicker"]}>
-						<DateRangePicker
-							localeText={{ start: "Check-in", end: "Check-out" }}
-						/>
-					</DemoContainer>
-				</LocalizationProvider> */}
+				<Box
+					sx={{
+						marginLeft: "1em",
+					}}
+				>
+					{activePeriod === "custom" ? (
+						<Space direction="vertical" size={6}>
+							<RangePicker onChange={onChange} />
+							{/* <RangePicker showTime />
+    <RangePicker picker="week" />
+    <RangePicker picker="month" />
+    <RangePicker picker="quarter" />
+    <RangePicker picker="year" /> */}
+						</Space>
+					) : null}
+				</Box>
 			</Box>
 		</>
 	);

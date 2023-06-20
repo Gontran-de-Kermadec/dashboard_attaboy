@@ -14,19 +14,24 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpenseForm from "./ExpenseForm";
 import { BarRevenue } from "../components/charts/BarChart";
 import PieChart from "../components/charts/PieChart";
-
-import { RestaurantContext, ThemeContext, PeriodContext } from "../App";
+import { genericExpensesRequest } from "../data/generalFonctions";
+import {
+	RestaurantContext,
+	ThemeContext,
+	PeriodContext,
+	StartEndDateContext,
+} from "../App";
 //firebase - firestore
-import { db } from "../firebaseConfig";
+// import { db } from "../firebaseConfig";
 import {
 	// doc,
 	// setDoc,
-	addDoc,
-	Timestamp,
+	// addDoc,
+	// Timestamp,
 	// getDoc,
-	collection,
-	query,
-	where,
+	//collection,
+	//query,
+	//where,
 	// getDocs,
 	onSnapshot,
 	// updateDoc,
@@ -52,6 +57,7 @@ function AttaboyExpenses() {
 	const [activeRestaurant] = useContext(RestaurantContext);
 	const [activePeriod] = useContext(PeriodContext);
 	const [colorTheme] = useContext(ThemeContext);
+	const [startEndDate] = useContext(StartEndDateContext);
 
 	const [totalSalary, setTotalSalary] = useState(0);
 	const [totalOrder, setTotalOrder] = useState(0);
@@ -72,6 +78,7 @@ function AttaboyExpenses() {
 
 	const currentYear = new Date().getFullYear();
 	useEffect(() => {
+		//salary useeffect
 		const date = new Date();
 		const todayDate = new Date(
 			date.getFullYear(),
@@ -79,39 +86,70 @@ function AttaboyExpenses() {
 			date.getDate()
 		);
 		let startDate;
+		let endDate;
 		let totalSalary = 0;
 		let salaryData = [];
-		if (activePeriod === "annee") {
-			startDate = new Date(currentYear, 0, 1); //current year
-		} else if (activePeriod === "mois") {
-			startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
-		} else if (activePeriod === "semaine") {
-			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
-			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
-
-			todayDate === startDate
-				? (startDate = todayDate)
-				: (startDate = midnightDate);
-			console.log(startDate);
-		}
-		const requestSalary = query(
-			//  collection(db, `depenses/${activeRestaurant}/${type}`),
-			collection(db, `depenses/${activeRestaurant}/Salaires`),
-			where("timestamp", ">=", startDate),
-			where("timestamp", "<=", todayDate)
-		);
-		onSnapshot(requestSalary, (querySnapshot) => {
-			console.log(querySnapshot);
-			querySnapshot.forEach((doc) => {
-				console.log(doc.data());
-				totalSalary += doc.data().total;
-				salaryData.push(doc.data());
+		if (activePeriod === "custom") {
+			if (startEndDate !== null) {
+				startDate = new Date(startEndDate[0]);
+				endDate = new Date(startEndDate[1]);
+				// const requestOrder = query(
+				// 	collection(db, `depenses/${activeRestaurant}/Salaires`),
+				// 	where("timestamp", ">=", startDate),
+				// 	where("timestamp", "<=", endDate)
+				// );
+				const requestSalary = genericExpensesRequest(
+					activeRestaurant,
+					"Salaires",
+					startDate,
+					endDate
+				);
+				onSnapshot(requestSalary, (querySnapshot) => {
+					console.log(querySnapshot);
+					querySnapshot.forEach((doc) => {
+						console.log(doc.data());
+						totalSalary += doc.data().total;
+						salaryData.push(doc.data());
+					});
+					setTotalSalary(totalSalary);
+					setSalaryDetails(salaryData);
+				});
+			}
+		} else {
+			if (activePeriod === "annee") {
+				startDate = new Date(currentYear, 0, 1); //current year
+			} else if (activePeriod === "mois") {
+				startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
+			} else if (activePeriod === "semaine") {
+				startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
+				const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
+				todayDate === startDate
+					? (startDate = todayDate)
+					: (startDate = midnightDate);
+			}
+			// const requestSalary = query(
+			// 	collection(db, `depenses/${activeRestaurant}/Salaires`),
+			// 	where("timestamp", ">=", startDate),
+			// 	where("timestamp", "<=", todayDate)
+			// );
+			const requestSalary = genericExpensesRequest(
+				activeRestaurant,
+				"Salaires",
+				startDate,
+				todayDate
+			);
+			onSnapshot(requestSalary, (querySnapshot) => {
+				querySnapshot.forEach((doc) => {
+					totalSalary += doc.data().total;
+					salaryData.push(doc.data());
+				});
+				setTotalSalary(totalSalary);
+				setSalaryDetails(salaryData);
 			});
-			setTotalSalary(totalSalary);
-			setSalaryDetails(salaryData);
-		});
-	}, [activeRestaurant, activePeriod, currentYear]);
+		}
+	}, [activeRestaurant, activePeriod, currentYear, startEndDate]);
 	useEffect(() => {
+		// orders useeffect
 		const date = new Date();
 		const todayDate = new Date(
 			date.getFullYear(),
@@ -119,43 +157,76 @@ function AttaboyExpenses() {
 			date.getDate()
 		);
 		let startDate;
+		let endDate;
 		let totalOrder = 0;
 		let orderData = [];
-		if (activePeriod === "annee") {
-			startDate = new Date(currentYear, 0, 1); //current year
-		} else if (activePeriod === "mois") {
-			startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
-		} else if (activePeriod === "semaine") {
-			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
-			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
+		if (activePeriod === "custom") {
+			if (startEndDate !== null) {
+				console.log(startEndDate);
+				startDate = new Date(startEndDate[0]);
+				endDate = new Date(startEndDate[1]);
+				// const requestOrder = query(
+				// 	collection(db, `depenses/${activeRestaurant}/Commandes`),
+				// 	where("timestamp", ">=", startDate),
+				// 	where("timestamp", "<=", endDate)
 
-			todayDate === startDate
-				? (startDate = todayDate)
-				: (startDate = midnightDate);
-			console.log(startDate);
-		}
-		const requestOrder = query(
-			//  collection(db, `depenses/${activeRestaurant}/${type}`),
-			collection(db, `depenses/${activeRestaurant}/Commandes`),
-			where("timestamp", ">=", startDate),
-			where("timestamp", "<=", todayDate)
-		);
-		onSnapshot(requestOrder, (querySnapshot) => {
-			console.log(querySnapshot);
-			querySnapshot.forEach((doc) => {
-				console.log(doc.data());
-				totalOrder += doc.data().total;
-				orderData.push(doc.data());
+				// );
+				const requestOrder = genericExpensesRequest(
+					activeRestaurant,
+					"Commandes",
+					startDate,
+					endDate
+				);
+				onSnapshot(requestOrder, (querySnapshot) => {
+					console.log(querySnapshot);
+					querySnapshot.forEach((doc) => {
+						console.log(doc.data());
+						totalOrder += doc.data().total;
+						orderData.push(doc.data());
+					});
+					setTotalOrder(totalOrder);
+					setOrderDetails(orderData);
+				});
+			}
+		} else {
+			if (activePeriod === "annee") {
+				startDate = new Date(currentYear, 0, 1); //current year
+			} else if (activePeriod === "mois") {
+				startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
+			} else if (activePeriod === "semaine") {
+				startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
+				const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
 
-				// 	doordash: doordashTotal,
-				// 	restoLoco: restoLocoTotal,
-				// });
+				todayDate === startDate
+					? (startDate = todayDate)
+					: (startDate = midnightDate);
+				console.log(startDate);
+			}
+			// const requestOrder = query(
+			// 	collection(db, `depenses/${activeRestaurant}/Commandes`),
+			// 	where("timestamp", ">=", startDate),
+			// 	where("timestamp", "<=", todayDate)
+			// );
+			const requestOrder = genericExpensesRequest(
+				activeRestaurant,
+				"Commandes",
+				startDate,
+				todayDate
+			);
+			onSnapshot(requestOrder, (querySnapshot) => {
+				console.log(querySnapshot);
+				querySnapshot.forEach((doc) => {
+					console.log(doc.data());
+					totalOrder += doc.data().total;
+					orderData.push(doc.data());
+				});
+				setTotalOrder(totalOrder);
+				setOrderDetails(orderData);
 			});
-			setTotalOrder(totalOrder);
-			setOrderDetails(orderData);
-		});
-	}, [activeRestaurant, activePeriod, currentYear]);
+		}
+	}, [activeRestaurant, activePeriod, currentYear, startEndDate]);
 	useEffect(() => {
+		//others useeffect
 		const date = new Date();
 		const todayDate = new Date(
 			date.getFullYear(),
@@ -163,39 +234,74 @@ function AttaboyExpenses() {
 			date.getDate()
 		);
 		let startDate;
+		let endDate;
 		let totalOther = 0;
 		let otherData = [];
+		if (activePeriod === "custom") {
+			if (startEndDate !== null) {
+				console.log(startEndDate);
+				startDate = new Date(startEndDate[0]);
+				endDate = new Date(startEndDate[1]);
+				// const requestOrder = query(
+				// 	collection(db, `depenses/${activeRestaurant}/Autres`),
+				// 	where("timestamp", ">=", startDate),
+				// 	where("timestamp", "<=", endDate)
+				// );
+				const requestOther = genericExpensesRequest(
+					activeRestaurant,
+					"Autres",
+					startDate,
+					endDate
+				);
+				onSnapshot(requestOther, (querySnapshot) => {
+					console.log(querySnapshot);
+					querySnapshot.forEach((doc) => {
+						console.log(doc.data());
+						totalOther += doc.data().total;
+						otherData.push(doc.data());
+					});
+					setTotalOther(totalOther);
+					setOtherDetails(otherData);
+				});
+			}
+		} else {
+			if (activePeriod === "annee") {
+				startDate = new Date(currentYear, 0, 1); //current year
+			} else if (activePeriod === "mois") {
+				startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
+			} else if (activePeriod === "semaine") {
+				startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
+				const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
 
-		if (activePeriod === "annee") {
-			startDate = new Date(currentYear, 0, 1); //current year
-		} else if (activePeriod === "mois") {
-			startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
-		} else if (activePeriod === "semaine") {
-			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
-			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
-
-			todayDate === startDate
-				? (startDate = todayDate)
-				: (startDate = midnightDate);
-			console.log(startDate);
-		}
-		const requestOther = query(
-			//  collection(db, `depenses/${activeRestaurant}/${type}`),
-			collection(db, `depenses/${activeRestaurant}/Autres`),
-			where("timestamp", ">=", startDate),
-			where("timestamp", "<=", todayDate)
-		);
-		onSnapshot(requestOther, (querySnapshot) => {
-			console.log(querySnapshot);
-			querySnapshot.forEach((doc) => {
-				console.log(doc.data());
-				totalOther += doc.data().total;
-				otherData.push(doc.data());
+				todayDate === startDate
+					? (startDate = todayDate)
+					: (startDate = midnightDate);
+				console.log(startDate);
+			}
+			// const requestOther = query(
+			// 	//  collection(db, `depenses/${activeRestaurant}/${type}`),
+			// 	collection(db, `depenses/${activeRestaurant}/Autres`),
+			// 	where("timestamp", ">=", startDate),
+			// 	where("timestamp", "<=", todayDate)
+			// );
+			const requestOther = genericExpensesRequest(
+				activeRestaurant,
+				"Autres",
+				startDate,
+				todayDate
+			);
+			onSnapshot(requestOther, (querySnapshot) => {
+				console.log(querySnapshot);
+				querySnapshot.forEach((doc) => {
+					console.log(doc.data());
+					totalOther += doc.data().total;
+					otherData.push(doc.data());
+				});
+				setTotalOther(totalOther);
+				setOtherDetails(otherData);
 			});
-			setTotalOther(totalOther);
-			setOtherDetails(otherData);
-		});
-	}, [activePeriod, activeRestaurant, currentYear]);
+		}
+	}, [activePeriod, activeRestaurant, currentYear, startEndDate]);
 	// const handleSubmit = async (e) => {
 	// 	e.preventDefault();
 	// 	const checkingrequest = query(

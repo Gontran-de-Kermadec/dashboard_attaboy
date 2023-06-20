@@ -8,7 +8,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { db } from "../firebaseConfig";
 import { RestaurantContext, ThemeContext } from "../App";
-import moment from "moment";
+// import moment from "moment";
 //firestore
 import {
 	doc,
@@ -55,14 +55,7 @@ function CaisseForm() {
 	//context variables
 	const [activeRestaurant] = useContext(RestaurantContext);
 	const [colorTheme] = useContext(ThemeContext);
-	console.log(activeRestaurant);
-	//disable input
-	// const [argent, setArgent] = useState(false);
-	// const [tpv, setTpv] = useState(false);
-	// const [wixInput, setWixInput] = useState(false);
-	// const [uberInput, setUberInput] = useState(false);
-	// const [doordashInput, setDoordashInput] = useState(false);
-	// const [restoInput, setRestoInput] = useState(false);
+
 	//amount just added in input
 	const [tpvNumber, setTpvNumber] = useState(0);
 	const [argentNumber, setArgentNumber] = useState(0);
@@ -79,19 +72,15 @@ function CaisseForm() {
 
 	//label input
 
-	// const removeTaxes = (amount) => {
-	// 	return amount - amount * (15 / 100);
+	// const tipsSummary = {
+	// 	date: date,
+	// 	tpv: tpvTips,
+	// 	wix: wixTips,
+	// 	uber: uberTips,
+	// 	doordash: doordashTips,
+	// 	restoloco: restoTips,
+	// 	total: totalTips,
 	// };
-
-	const tipsSummary = {
-		date: date,
-		tpv: tpvTips,
-		wix: wixTips,
-		uber: uberTips,
-		doordash: doordashTips,
-		restoloco: restoTips,
-		total: totalTips,
-	};
 	const salesSummary = {
 		date: date,
 		timestamp: timeStampDate,
@@ -120,7 +109,8 @@ function CaisseForm() {
 		const wixAmount = wixNumber === undefined ? Number(0) : wixNumber;
 		const uberAmount = uberNumber === undefined ? Number(0) : uberNumber;
 		const uberAmountTaxesFree =
-			uberNumber === undefined ? Number(0) : removeTaxes(uberNumber);
+			uberNumber === undefined ? Number(0) : removeUberFees(uberNumber);
+		//uberNumber === undefined ? Number(0) : removeTaxes(uberNumber);
 		const doordashAmount =
 			doordashNumber === undefined ? Number(0) : doordashNumber;
 		const restoAmount = restoNumber === undefined ? Number(0) : restoNumber;
@@ -129,8 +119,8 @@ function CaisseForm() {
 			argentAmountTaxesFree +
 			wixAmount +
 			uberAmountTaxesFree +
-			doordashAmount +
-			restoAmount;
+			removeDoordashFees(doordashAmount) +
+			removeRestoLocoFees(restoAmount);
 		setTotal(sum);
 		let sumToDisplay =
 			tpvAmount +

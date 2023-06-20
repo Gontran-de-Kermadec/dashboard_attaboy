@@ -108,6 +108,7 @@ function EmployeeForm({ handleClose }) {
 			employeeDetails
 		);
 		console.log("Document written with ID: " + userDoc.id);
+		window.location.reload();
 		handleClose();
 	};
 	const getSelectedDate = (e) => {
@@ -123,8 +124,6 @@ function EmployeeForm({ handleClose }) {
 		const formattedDate = new Date(month + "/" + day + "/" + year);
 		console.log(formattedDate);
 		setBirthDate(month + "/" + day + "/" + year);
-		//const timestampFormat = Timestamp.fromDate(e.$d);
-		//setTimeStampDate(timestampFormat);
 		// setError(false);
 	};
 	return (

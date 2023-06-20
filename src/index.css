@@ -12,6 +12,27 @@ body {
 .caisse__container {
 	width: 100%;
 }
+/* #root
+	> div
+	> div.MuiContainer-root.MuiContainer-maxWidthLg.css-1oqqzyl-MuiContainer-root
+	> div.MuiBox-root.css-70qvj9
+	> div.MuiBox-root.css-99v7i
+	> div
+	> div
+	> div {
+	border-color: yellow;
+}
+#root
+	> div
+	> div.MuiContainer-root.MuiContainer-maxWidthLg.css-1oqqzyl-MuiContainer-root
+	> div.MuiBox-root.css-70qvj9
+	> div.MuiBox-root.css-99v7i
+	> div
+	> div
+	> div
+	> div.ant-picker-active-bar {
+	background: pink;
+} */
 
 code {
 	font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",

@@ -46,13 +46,17 @@ function Employes() {
 
 	const [activeEmployee, setActiveEmployee] = useState();
 	const [employeesDatas, setEmployeesDatas] = useState([]);
+	const [testEmployee, setTestEmployee] = useState([]);
 
 	const [currentField, setCurrentField] = useState("");
 	const [parentToElement, setParentToElement] = useState("");
 	const [userId, setUserId] = useState();
 	const [open, setOpen] = useState(false);
 	const handleOpen = () => setOpen(true);
-	const handleClose = () => setOpen(false);
+	const handleClose = () => {
+		setOpen(false);
+	};
+
 	const [openDelete, setOpenDelete] = useState(false);
 	const handleOpenDelete = (id) => {
 		console.log(id);
@@ -207,32 +211,13 @@ function Employes() {
 	}));
 	const handleDeleteEmployee = async () => {
 		await deleteDoc(doc(db, `personnel/${activeRestaurant}/salarie/${userId}`));
+		window.location.reload();
 		setOpenDelete(false);
 	};
-	// useEffect(() => {
-	// 	const request = query(
-	// 		collection(db, `personnel/${activeRestaurant}/salarie`),
-	// 		where("personnal_infos.cellNumber", "==", "581-442-0325")
-	// 		// where("timestamp", "<=", todayDate)
-	// 	);
-	// 	console.log(request);
-	// 	// let dataToDisplay = [];
-	// 	// let dataWithDocId;
-	// 	onSnapshot(request, (querySnapshot) => {
-	// 		querySnapshot.forEach((doc) => {
-	// 			console.log(doc.id);
-	// 			// dataWithDocId = doc.data();
-	// 			// dataWithDocId.documentId = doc.id;
-	// 			// dataToDisplay.push(dataWithDocId);
-	// 		});
-	// 		//setEmployeesDatas(dataToDisplay);
-	// 	});
-	// }, [activeRestaurant]);
+
 	useEffect(() => {
 		const request = query(
 			collection(db, `personnel/${activeRestaurant}/salarie`)
-			// where("timestamp", ">=", startDate),
-			// where("timestamp", "<=", todayDate)
 		);
 		console.log(request);
 		let dataToDisplay = [];
@@ -248,6 +233,7 @@ function Employes() {
 			setEmployeesDatas(dataToDisplay);
 		});
 	}, [activeRestaurant]);
+
 	console.log(employeesDatas);
 	return (
 		<>

@@ -26,12 +26,32 @@ export const displayScoreColor = (value) => {
 	return color;
 };
 
+export const genericSalesRequest = (restaurant, year, startDate, endDate) => {
+	const request = query(
+		collection(db, `ventes/${restaurant}/${year}`),
+		where("timestamp", ">=", startDate),
+		where("timestamp", "<=", endDate)
+	);
+	return request;
+};
+export const genericExpensesRequest = (
+	restaurant,
+	expenseType,
+	startDate,
+	endDate
+) => {
+	const request = query(
+		collection(db, `depenses/${restaurant}/${expenseType}`),
+		where("timestamp", ">=", startDate),
+		where("timestamp", "<=", endDate)
+	);
+	return request;
+};
+
 export const getLastDayRevenue = (restaurant, year, lastDay, constToSet) => {
 	const lastDayRequest = query(
-		// collection(db, `ventes/${activeRestaurant}/${currentYear}`),
 		collection(db, `ventes/${restaurant}/${year}`),
 		where("timestamp", "==", lastDay)
-		// where("timestamp", "==", previousDay)
 	);
 	let lastDayRevenue = 0;
 	console.log(lastDayRequest);
@@ -40,7 +60,6 @@ export const getLastDayRevenue = (restaurant, year, lastDay, constToSet) => {
 			console.log("pas de revenus hier");
 			constToSet(0);
 		} else {
-			console.log("des reveues");
 			querySnapshot.forEach((doc) => {
 				console.log(doc.data().sourcesOfRevenues);
 				lastDayRevenue = doc.data().total;

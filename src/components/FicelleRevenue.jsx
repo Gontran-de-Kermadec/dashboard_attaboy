@@ -1,5 +1,10 @@
 import React, { useEffect, useState, useContext } from "react";
-import { PeriodContext, RestaurantContext, ThemeContext } from "../App";
+import {
+	PeriodContext,
+	RestaurantContext,
+	ThemeContext,
+	StartEndDateContext,
+} from "../App";
 import styled from "@emotion/styled";
 import {
 	collection,
@@ -10,13 +15,24 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { Container, Paper, Typography, Box, Divider } from "@mui/material";
+import Table from "@mui/material/Table";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
 import PieChart from "./charts/PieChart";
 import { FicelleBarRevenue } from "./charts/BarChart";
+import {
+	getLastDayRevenue,
+	genericSalesRequest,
+} from "../data/generalFonctions";
 function FicelleRevenue() {
 	// react context variable
 	const [activePeriod] = useContext(PeriodContext);
 	const [activeRestaurant] = useContext(RestaurantContext);
 	const [colorTheme] = useContext(ThemeContext);
+	const [startEndDate] = useContext(StartEndDateContext);
 	const [data, setData] = useState([]);
 
 	const [lastDailyRevenue, setLastDailyRevenue] = useState(0);
@@ -26,7 +42,7 @@ function FicelleRevenue() {
 	const [argentRevenue, setArgentRevenue] = useState(0);
 	// const [wixRevenue, setWixRevenue] = useState(0);
 	const [doordashRevenue, setDoordashRevenue] = useState(0);
-
+	const [specificPeriod, setSpecificPeriod] = useState();
 	const [labels, setLabels] = useState();
 	const [sourcesRevenue, setSourcesRevenue] = useState();
 	const ficelleBackgroundColor = ["#3C6843", "#71AD79", "#528E5C", "#0F1A11"];
@@ -45,11 +61,8 @@ function FicelleRevenue() {
 	}));
 	useEffect(() => {
 		if (data) {
-			console.log(data);
-			console.log("manipulez moi");
 			const formattedDataArray = Object.entries(data);
 			const label = formattedDataArray.map((array) => {
-				//console.log(array[0]);
 				return array[0];
 			});
 			const dataNumbers = formattedDataArray.map((array) => {
@@ -61,11 +74,51 @@ function FicelleRevenue() {
 			return null;
 		}
 	}, [data]);
+	//get daily revenue accorfing to selected period
+	useEffect(() => {
+		let year;
+		let startDate;
+		let endDate;
+		let specificPeriodRevenue = [];
+		if (startEndDate !== null) {
+			const date = new Date(startEndDate[0]);
+
+			year = date.getFullYear();
+			startDate = new Date(startEndDate[0]);
+			endDate = new Date(startEndDate[1]);
+			const previousDay = new Date(
+				startDate.getFullYear(),
+				startDate.getMonth(),
+				startDate.getDate() - 1
+			);
+			// const getSpecificData = query(
+			// 	collection(db, `ventes/${activeRestaurant}/${year}`),
+			// 	where("timestamp", ">=", previousDay),
+			// 	where("timestamp", "<=", endDate)
+			// );
+			const getSpecificData = genericSalesRequest(
+				activeRestaurant,
+				year,
+				previousDay,
+				endDate
+			);
+			onSnapshot(getSpecificData, (querySnapshot) => {
+				querySnapshot.forEach((doc) => {
+					console.log(doc.data());
+					// totalMonthBefore += doc.data().total;
+					specificPeriodRevenue.push(doc.data());
+				});
+				setSpecificPeriod(specificPeriodRevenue);
+				// setSpecificPeriod((prev) => [...prev, testObject]);
+			});
+		}
+	}, [activeRestaurant, startEndDate]);
+
 	useEffect(() => {
 		let startDate;
 		const date = new Date();
 		const currentYear = new Date().getFullYear();
-		const todayDate = new Date(
+		let todayDate = new Date(
 			date.getFullYear(),
 			date.getMonth(),
 			date.getDate()
@@ -76,19 +129,31 @@ function FicelleRevenue() {
 			startDate = new Date(date.getFullYear(), date.getMonth(), 1);
 		} else if (activePeriod === "semaine") {
 			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
-			//console.log(startDate);
 			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
-			//console.log(midnightDate);
+			todayDate === startDate
+				? (startDate = todayDate)
+				: (startDate = midnightDate);
+		} else if (activePeriod === "custom" && startEndDate !== null) {
+			startDate = new Date(startEndDate[0]);
+			todayDate = new Date(startEndDate[1]);
+		} else if (activePeriod === "custom" && startEndDate === null) {
+			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
+			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
 			todayDate === startDate
 				? (startDate = todayDate)
 				: (startDate = midnightDate);
 		}
-		const q = query(
-			collection(db, `ventes/${activeRestaurant}/${currentYear}`),
-			where("timestamp", ">=", startDate),
-			where("timestamp", "<=", todayDate)
+		// const q = query(
+		// 	collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+		// 	where("timestamp", ">=", startDate),
+		// 	where("timestamp", "<=", todayDate)
+		// );
+		const q = genericSalesRequest(
+			activeRestaurant,
+			currentYear,
+			startDate,
+			todayDate
 		);
-		console.log(q);
 		let total = 0;
 		let uberTotal = 0;
 		let tpvTotal = 0;
@@ -115,7 +180,7 @@ function FicelleRevenue() {
 			});
 			console.log(argentTotal);
 		});
-	}, [activePeriod, activeRestaurant]);
+	}, [activePeriod, activeRestaurant, startEndDate]);
 	useEffect(() => {
 		const date = new Date();
 		const currentYear = new Date().getFullYear();
@@ -124,24 +189,29 @@ function FicelleRevenue() {
 			date.getMonth(),
 			date.getDate() - 1
 		);
-		const lastDayRequest = query(
-			collection(db, `ventes/${activeRestaurant}/${currentYear}`),
-			where("timestamp", "==", previousDay)
+		getLastDayRevenue(
+			activeRestaurant,
+			currentYear,
+			previousDay,
+			setLastDailyRevenue
 		);
-		let lastDayRevenue = 0;
-		console.log(lastDayRequest);
-		onSnapshot(lastDayRequest, (querySnapshot) => {
-			if (querySnapshot.empty) {
-				console.log("pas de revenus hier");
-				setLastDailyRevenue(0);
-			} else {
-				querySnapshot.forEach((doc) => {
-					console.log(doc.data().sourcesOfRevenues);
-					lastDayRevenue = doc.data().total;
-				});
-				setLastDailyRevenue(lastDayRevenue);
-			}
-		});
+		// const lastDayRequest = query(
+		// 	collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+		// 	where("timestamp", "==", previousDay)
+		// );
+		// let lastDayRevenue = 0;
+		// onSnapshot(lastDayRequest, (querySnapshot) => {
+		// 	if (querySnapshot.empty) {
+		// 		console.log("pas de revenus hier");
+		// 		setLastDailyRevenue(0);
+		// 	} else {
+		// 		querySnapshot.forEach((doc) => {
+		// 			console.log(doc.data().sourcesOfRevenues);
+		// 			lastDayRevenue = doc.data().total;
+		// 		});
+		// 		setLastDailyRevenue(lastDayRevenue);
+		// 	}
+		// });
 	}, [activeRestaurant]);
 	return (
 		<>
@@ -233,6 +303,53 @@ function FicelleRevenue() {
 					/>
 				</Box>
 			</Box>
+			<Divider />
+			<TableContainer>
+				<Table>
+					<TableHead
+						sx={{
+							background: colorTheme,
+						}}
+					>
+						<TableRow>
+							<TableCell>Date</TableCell>
+							<TableCell>Argent</TableCell>
+							<TableCell>TPV</TableCell>
+							<TableCell>Wix</TableCell>
+							<TableCell>Resto Loco</TableCell>
+							<TableCell>Uber</TableCell>
+							<TableCell>Doordash</TableCell>
+							<TableCell>Total</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{specificPeriod?.map((element) => (
+							<TableRow
+								key={element.date}
+								sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+							>
+								<TableCell component="th" scope="row">
+									{element.date}
+								</TableCell>
+								<TableCell>{element.sourcesOfRevenues.argent}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.tpv}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.wix}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.restoloco}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.uber}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.doordash}$</TableCell>
+								<TableCell>{element.total}$</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
+			{/* {specificPeriod?.map((x) => {
+				return (
+					<Typography>
+						{x.date} / {x.total}
+					</Typography>
+				);
+			})} */}
 		</>
 	);
 }

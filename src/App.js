@@ -7,8 +7,10 @@ import Revenus from "./pages/Revenus";
 import { createContext, useState, useEffect } from "react";
 import Depenses from "./pages/Depenses";
 import Employes from "./pages/Employes";
+import Authentication from "./pages/Authentication";
 
 export const PeriodContext = createContext();
+export const StartEndDateContext = createContext();
 export const RestaurantContext = createContext();
 export const ThemeContext = createContext();
 
@@ -20,6 +22,7 @@ function App() {
 	const [activePeriod, setActivePeriod] = useState("annee");
 	const [activeRestaurant, setActiveRestaurant] = useState("attaboy");
 	const [colorTheme, setColorTheme] = useState(attaboyTheme);
+	const [startEndDate, setStartEndDate] = useState(null);
 
 	useEffect(() => {
 		const changeTheme = () => {
@@ -50,15 +53,18 @@ function App() {
 				value={[activeRestaurant, setActiveRestaurant]}
 			>
 				<ThemeContext.Provider value={[colorTheme, setColorTheme]}>
-					<PeriodContext.Provider value={[activePeriod, setActivePeriod]}>
-						<Routes>
-							<Route path="/" element={<Home />} />
-							<Route path="/revenus" element={<Revenus />} />
-							<Route path="/caisse" element={<Caisse />} />
-							<Route path="/depenses" element={<Depenses />} />
-							<Route path="/employes" element={<Employes />} />
-						</Routes>
-					</PeriodContext.Provider>
+					<StartEndDateContext.Provider value={[startEndDate, setStartEndDate]}>
+						<PeriodContext.Provider value={[activePeriod, setActivePeriod]}>
+							<Routes>
+								<Route path="/" element={<Home />} />
+								<Route path="/connexion" element={<Authentication />} />
+								<Route path="/revenus" element={<Revenus />} />
+								<Route path="/caisse" element={<Caisse />} />
+								<Route path="/depenses" element={<Depenses />} />
+								<Route path="/employes" element={<Employes />} />
+							</Routes>
+						</PeriodContext.Provider>
+					</StartEndDateContext.Provider>
 				</ThemeContext.Provider>
 			</RestaurantContext.Provider>
 		</>

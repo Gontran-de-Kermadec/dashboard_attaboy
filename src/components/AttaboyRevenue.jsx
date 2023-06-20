@@ -1,5 +1,10 @@
-import React, { useEffect, useState, useContext, useMemo } from "react";
-import { PeriodContext, RestaurantContext, ThemeContext } from "../App";
+import React, { useEffect, useState, useContext } from "react";
+import {
+	PeriodContext,
+	RestaurantContext,
+	ThemeContext,
+	StartEndDateContext,
+} from "../App";
 import styled from "@emotion/styled";
 import {
 	collection,
@@ -10,10 +15,19 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { Paper, Typography, Box, Divider } from "@mui/material";
+import Table from "@mui/material/Table";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
+
 import { BarRevenue } from "../components/charts/BarChart";
 import PieChart from "../components/charts/PieChart";
-import { getLastDayRevenue } from "../data/generalFonctions";
-// import { todayDate } from "../data/getData";
+import {
+	getLastDayRevenue,
+	genericSalesRequest,
+} from "../data/generalFonctions";
 
 function AttaboyRevenue() {
 	//console.log(dateTest);
@@ -21,6 +35,8 @@ function AttaboyRevenue() {
 	const [activePeriod] = useContext(PeriodContext);
 	const [activeRestaurant] = useContext(RestaurantContext);
 	const [colorTheme] = useContext(ThemeContext);
+	const [startEndDate] = useContext(StartEndDateContext);
+
 	const [data, setData] = useState([]);
 
 	//data for charts
@@ -41,6 +57,9 @@ function AttaboyRevenue() {
 	const [revenueMonthsBefore, setRevenueMonthsBefore] = useState([]);
 	const [finalCount, setFinalCount] = useState([]);
 	const [finalMonthArray, setFinalMotnhArray] = useState([]);
+
+	//specific Period
+	const [specificPeriod, setSpecificPeriod] = useState();
 
 	const attaboyBackgroundColor = [
 		"#B89C00",
@@ -63,11 +82,45 @@ function AttaboyRevenue() {
 		margin: "0.3em",
 		color: activeRestaurant === "ficelle" ? "#fff" : "#000",
 	}));
-	//console.log(data);
-	//if (data.length !== 0) {
-	//const setLabelsAndData = async() => {
 
-	console.log(revenueWeeksBefore);
+	useEffect(() => {
+		let year;
+		let startDate;
+		let endDate;
+		let specificPeriodRevenue = [];
+		if (startEndDate !== null) {
+			const date = new Date(startEndDate[0]);
+
+			year = date.getFullYear();
+			startDate = new Date(startEndDate[0]);
+			endDate = new Date(startEndDate[1]);
+			const previousDay = new Date(
+				startDate.getFullYear(),
+				startDate.getMonth(),
+				startDate.getDate() - 1
+			);
+			// const getSpecificData = query(
+			// 	collection(db, `ventes/${activeRestaurant}/${year}`),
+			// 	where("timestamp", ">=", previousDay),
+			// 	where("timestamp", "<=", endDate)
+			// );
+			const getSpecificData = genericSalesRequest(
+				activeRestaurant,
+				year,
+				previousDay,
+				endDate
+			);
+			onSnapshot(getSpecificData, (querySnapshot) => {
+				querySnapshot.forEach((doc) => {
+					console.log(doc.data());
+					// totalMonthBefore += doc.data().total;
+					specificPeriodRevenue.push(doc.data());
+				});
+				setSpecificPeriod(specificPeriodRevenue);
+				// setSpecificPeriod((prev) => [...prev, testObject]);
+			});
+		}
+	}, [activeRestaurant, startEndDate]);
 
 	useEffect(() => {
 		if (data) {
@@ -88,205 +141,267 @@ function AttaboyRevenue() {
 		}
 	}, [data]);
 
-	//console.log(labels);
-	//console.log(allRevenue);
-
 	useEffect(() => {
 		setRevenueWeeksBefore([]);
 		setRevenueMonthsBefore([]);
-		const date = new Date();
-		console.log(date.getDate() - 1);
 		let startDate;
+		let endDate;
+		let specificPeriodRevenue = [];
+		const date = new Date();
 		const currentYear = new Date().getFullYear();
 		const todayDate = new Date(
 			date.getFullYear(),
 			date.getMonth(),
 			date.getDate()
 		);
-		const previousDay = new Date(
-			date.getFullYear(),
-			date.getMonth(),
-			date.getDate() - 1
-		);
-		const year = new Date(date.getFullYear(), 0, 1);
-		const days = Math.floor((date - year) / (24 * 60 * 60 * 1000));
-		const week = Math.ceil((date.getDay() + 1 + days) / 7);
-		console.log(week);
-
-		if (activePeriod === "annee") {
-			startDate = new Date(currentYear, 0, 1); //current year
-		} else if (activePeriod === "mois") {
-			startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
-
-			//variables to get month before
-			const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-			const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-			const previousMonthFirstDay = (x) => {
-				let substractor = x * 1;
-				let monthFirstDay = new Date(
-					date.getFullYear(),
-					date.getMonth() - substractor,
-					1
-					// date.getDate() - substractor
-				);
-				return monthFirstDay;
-			};
-			// const prevMonthFirstDate = new Date(
-			// 	date.getFullYear() - (date.getMonth() > 0 ? 0 : 1),
-			// 	(date.getMonth() - 1 + 12) % 12,
-			// 	1
-			// );
-			//console.log(prevMonthFirstDate);
-			console.log(previousMonthFirstDay(2));
-			const previousMonthLastDay = (x) => {
-				let substractor = x * 1 - 1;
-				let monthLastDay = new Date(
-					date.getFullYear(),
-					date.getMonth() - substractor,
-					0
-				);
-				return monthLastDay;
-			};
-			console.log(previousMonthLastDay(2));
-			const numberOfMonthBefore = 5;
-			for (let i = 1; i < numberOfMonthBefore; i++) {
-				const startMonth = previousMonthFirstDay(i);
-				const endMonth = previousMonthLastDay(i);
-				console.log(startMonth);
-				console.log(endMonth);
-				let totalMonthBefore = 0;
-				let randomDate;
-				const getMonthBefore = query(
-					collection(db, `ventes/${activeRestaurant}/${currentYear}`),
-					where("timestamp", ">=", startMonth),
-					where("timestamp", "<=", endMonth)
-				);
-				onSnapshot(getMonthBefore, (querySnapshot) => {
-					querySnapshot.forEach((doc) => {
-						console.log(doc.data().total);
-						totalMonthBefore += doc.data().total;
-						randomDate = doc.data().date;
-					});
-					const testObject = {
-						date: randomDate,
-						total: totalMonthBefore,
-					};
-					console.log(testObject);
-					setRevenueMonthsBefore((prev) => [...prev, testObject]);
-				});
-			}
-		} else if (activePeriod === "semaine") {
-			startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
-			const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
-			//console.log(midnightDate);
-			todayDate === startDate
-				? (startDate = todayDate)
-				: (startDate = midnightDate);
-
-			// variables to get weeks before
-			const previousWeekStart = (x) => {
-				let substractor = x * 7;
-				let weekFirstDay = new Date(
-					date.getFullYear(),
-					date.getMonth(),
-					date.getDate() - substractor
-				);
-				return weekFirstDay;
-			};
-			const previousWeekEnd = (x) => {
-				let substractor = x * 7 - 7 + 1;
-				let weekLastDay = new Date(
-					date.getFullYear(),
-					date.getMonth(),
-					date.getDate() - substractor
-				);
-				return weekLastDay;
-			};
-			const numberOfWeekBefore = 5;
-			for (let i = 1; i < numberOfWeekBefore; i++) {
-				const beginningWeek = previousWeekStart(i);
-				const weekEnding = previousWeekEnd(i);
-				// console.log(beginningWeek);
-				// console.log(weekEnding);
-				let totalWeekBefore = 0;
-				let randomDate;
-				const getWeekBefore = query(
-					collection(db, `ventes/${activeRestaurant}/${currentYear}`),
-					where("timestamp", ">=", beginningWeek),
-					where("timestamp", "<=", weekEnding)
-				);
-				onSnapshot(getWeekBefore, (querySnapshot) => {
-					querySnapshot.forEach((doc) => {
-						console.log(doc.data().total + " " + doc.data().date);
-						totalWeekBefore += doc.data().total;
-						randomDate = doc.data().date;
-					});
-					const testObject = {
-						date: randomDate,
-						total: totalWeekBefore,
-					};
-
-					setRevenueWeeksBefore((prev) => [...prev, testObject]);
-				});
-			}
-		}
-		let total = 0;
-		let uberTotal = 0;
-		let tpvTotal = 0;
-		let argentTotal = 0;
-		let doordashTotal = 0;
-		let restoLocoTotal = 0;
-		let wixTotal = 0;
-		const q = query(
-			collection(db, `ventes/${activeRestaurant}/${currentYear}`),
-			where("timestamp", ">=", startDate),
-			where("timestamp", "<=", todayDate)
-		);
-		console.log(todayDate);
-		onSnapshot(q, (querySnapshot) => {
-			querySnapshot.forEach((doc) => {
-				console.log(doc.data().sourcesOfRevenues);
-				total += doc.data().total;
-				uberTotal += doc.data().sourcesOfRevenues.uber;
-				tpvTotal += doc.data().sourcesOfRevenues.tpv;
-				argentTotal += doc.data().sourcesOfRevenues.argent;
-				doordashTotal += doc.data().sourcesOfRevenues.doordash;
-				wixTotal += doc.data().sourcesOfRevenues.wix;
-				restoLocoTotal += doc.data().sourcesOfRevenues.restoloco;
-				setAllRevenue((prev) => [...prev]);
-			});
-
-			setUberRevenue(Math.round(uberTotal));
-			setTpvRevenue(Math.round(tpvTotal));
-			setArgentRevenue(Math.round(argentTotal));
-			setDoordashRevenue(Math.round(doordashTotal));
-			setWixRevenue(Math.round(wixTotal));
-			setRestoLocoRevenue(Math.round(restoLocoTotal));
-			setRevenue(Math.round(total));
-			setData({
-				argent: argentTotal,
-				tpv: tpvTotal,
-				wix: wixTotal,
-				uber: uberTotal,
-				doordash: doordashTotal,
-				restoLoco: restoLocoTotal,
-			});
-		});
-		// const lastDayRequest = query(
-		// 	collection(db, `ventes/${activeRestaurant}/${currentYear}`),
-		// 	where("timestamp", "==", previousDay)
+		// const previousDay = new Date(
+		// 	date.getFullYear(),
+		// 	date.getMonth(),
+		// 	date.getDate() - 1
 		// );
-		// onSnapshot(lastDayRequest, (querySnapshot) => {
-		// 	if (querySnapshot.empty) {
-		// 		console.log("pas de revenus hier");
-		// 	} else {
-		// 		querySnapshot.forEach((doc) => {
-		// 			console.log(doc.data().sourcesOfRevenues);
-		// 			//total += doc.data().total;
-		// 		});
-		// 	}
-		// });
-	}, [activePeriod, activeRestaurant]);
+		//const year = new Date(date.getFullYear(), 0, 1);
+		//const days = Math.floor((date - year) / (24 * 60 * 60 * 1000));
+		//const week = Math.ceil((date.getDay() + 1 + days) / 7);
+		if (activePeriod === "custom") {
+			let total = 0;
+			let uberTotal = 0;
+			let tpvTotal = 0;
+			let argentTotal = 0;
+			let doordashTotal = 0;
+			let restoLocoTotal = 0;
+			let wixTotal = 0;
+			if (startEndDate !== null) {
+				const date = new Date(startEndDate[0]);
+
+				let year = date.getFullYear();
+				//const year = new Date(startEndDate[0].getFullYear(), 0, 1);
+				startDate = new Date(startEndDate[0]);
+				endDate = new Date(startEndDate[1]);
+				const previousDay = new Date(
+					startDate.getFullYear(),
+					startDate.getMonth(),
+					startDate.getDate() - 1
+				);
+				// const getSpecificData = query(
+				// 	collection(db, `ventes/${activeRestaurant}/${year}`),
+				// 	where("timestamp", ">=", previousDay),
+				// 	where("timestamp", "<=", endDate)
+				// );
+				const getSpecificData = genericSalesRequest(
+					activeRestaurant,
+					year,
+					previousDay,
+					endDate
+				);
+				onSnapshot(getSpecificData, (querySnapshot) => {
+					querySnapshot.forEach((doc) => {
+						console.log(doc.data());
+						specificPeriodRevenue.push(doc.data());
+						total += doc.data().total;
+						uberTotal += doc.data().sourcesOfRevenues.uber;
+						tpvTotal += doc.data().sourcesOfRevenues.tpv;
+						argentTotal += doc.data().sourcesOfRevenues.argent;
+						doordashTotal += doc.data().sourcesOfRevenues.doordash;
+						wixTotal += doc.data().sourcesOfRevenues.wix;
+						restoLocoTotal += doc.data().sourcesOfRevenues.restoloco;
+						setAllRevenue((prev) => [...prev]);
+					});
+					setSpecificPeriod(specificPeriodRevenue);
+					setUberRevenue(Math.round(uberTotal));
+					setTpvRevenue(Math.round(tpvTotal));
+					setArgentRevenue(Math.round(argentTotal));
+					setDoordashRevenue(Math.round(doordashTotal));
+					setWixRevenue(Math.round(wixTotal));
+					setRestoLocoRevenue(Math.round(restoLocoTotal));
+					setRevenue(Math.round(total));
+					setData({
+						argent: argentTotal,
+						tpv: tpvTotal,
+						wix: wixTotal,
+						uber: uberTotal,
+						doordash: doordashTotal,
+						restoLoco: restoLocoTotal,
+					});
+					// setSpecificPeriod((prev) => [...prev, testObject]);
+				});
+			}
+		} else {
+			if (activePeriod === "annee") {
+				startDate = new Date(currentYear, 0, 1); //current year
+			} else if (activePeriod === "mois") {
+				startDate = new Date(date.getFullYear(), date.getMonth(), 1); //current month
+
+				//variables to get month before
+				const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+				const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+				const previousMonthFirstDay = (x) => {
+					let substractor = x * 1;
+					let monthFirstDay = new Date(
+						date.getFullYear(),
+						date.getMonth() - substractor,
+						1
+						// date.getDate() - substractor
+					);
+					return monthFirstDay;
+				};
+				// const prevMonthFirstDate = new Date(
+				// 	date.getFullYear() - (date.getMonth() > 0 ? 0 : 1),
+				// 	(date.getMonth() - 1 + 12) % 12,
+				// 	1
+				// );
+				//console.log(prevMonthFirstDate);
+				console.log(previousMonthFirstDay(2));
+				const previousMonthLastDay = (x) => {
+					let substractor = x * 1 - 1;
+					let monthLastDay = new Date(
+						date.getFullYear(),
+						date.getMonth() - substractor,
+						0
+					);
+					return monthLastDay;
+				};
+				console.log(previousMonthLastDay(2));
+				const numberOfMonthBefore = 5;
+				for (let i = 1; i < numberOfMonthBefore; i++) {
+					const startMonth = previousMonthFirstDay(i);
+					const endMonth = previousMonthLastDay(i);
+
+					let totalMonthBefore = 0;
+					let randomDate;
+					// const getMonthBefore = query(
+					// 	collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+					// 	where("timestamp", ">=", startMonth),
+					// 	where("timestamp", "<=", endMonth)
+					// );
+					const getMonthBefore = genericSalesRequest(
+						activeRestaurant,
+						currentYear,
+						startMonth,
+						endMonth
+					);
+					onSnapshot(getMonthBefore, (querySnapshot) => {
+						querySnapshot.forEach((doc) => {
+							console.log(doc.data().total);
+							totalMonthBefore += doc.data().total;
+							randomDate = doc.data().date;
+						});
+						const testObject = {
+							date: randomDate,
+							total: totalMonthBefore,
+						};
+						console.log(testObject);
+						setRevenueMonthsBefore((prev) => [...prev, testObject]);
+					});
+				}
+			} else if (activePeriod === "semaine") {
+				startDate = new Date(date.setDate(date.getDate() - date.getDay())); //first day of current week
+				const midnightDate = new Date(startDate.setHours(0, 0, 0, 0));
+				//console.log(midnightDate);
+				todayDate === startDate
+					? (startDate = todayDate)
+					: (startDate = midnightDate);
+
+				// variables to get weeks before
+				const previousWeekStart = (x) => {
+					let substractor = x * 7;
+					let weekFirstDay = new Date(
+						date.getFullYear(),
+						date.getMonth(),
+						date.getDate() - substractor
+					);
+					return weekFirstDay;
+				};
+				const previousWeekEnd = (x) => {
+					let substractor = x * 7 - 7 + 1;
+					let weekLastDay = new Date(
+						date.getFullYear(),
+						date.getMonth(),
+						date.getDate() - substractor
+					);
+					return weekLastDay;
+				};
+				const numberOfWeekBefore = 5;
+				for (let i = 1; i < numberOfWeekBefore; i++) {
+					const beginningWeek = previousWeekStart(i);
+					const weekEnding = previousWeekEnd(i);
+
+					let totalWeekBefore = 0;
+					let randomDate;
+					// const getWeekBefore = query(
+					// 	collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+					// 	where("timestamp", ">=", beginningWeek),
+					// 	where("timestamp", "<=", weekEnding)
+					// );
+					const getWeekBefore = genericSalesRequest(
+						activeRestaurant,
+						currentYear,
+						beginningWeek,
+						weekEnding
+					);
+					onSnapshot(getWeekBefore, (querySnapshot) => {
+						querySnapshot.forEach((doc) => {
+							totalWeekBefore += doc.data().total;
+							randomDate = doc.data().date;
+						});
+						const testObject = {
+							date: randomDate,
+							total: totalWeekBefore,
+						};
+
+						setRevenueWeeksBefore((prev) => [...prev, testObject]);
+					});
+				}
+			}
+			let total = 0;
+			let uberTotal = 0;
+			let tpvTotal = 0;
+			let argentTotal = 0;
+			let doordashTotal = 0;
+			let restoLocoTotal = 0;
+			let wixTotal = 0;
+			// const q = query(
+			// 	collection(db, `ventes/${activeRestaurant}/${currentYear}`),
+			// 	where("timestamp", ">=", startDate),
+			// 	where("timestamp", "<=", todayDate)
+			// );
+			const q = genericSalesRequest(
+				activeRestaurant,
+				currentYear,
+				startDate,
+				todayDate
+			);
+			onSnapshot(q, (querySnapshot) => {
+				querySnapshot.forEach((doc) => {
+					console.log(doc.data().sourcesOfRevenues);
+					total += doc.data().total;
+					uberTotal += doc.data().sourcesOfRevenues.uber;
+					tpvTotal += doc.data().sourcesOfRevenues.tpv;
+					argentTotal += doc.data().sourcesOfRevenues.argent;
+					doordashTotal += doc.data().sourcesOfRevenues.doordash;
+					wixTotal += doc.data().sourcesOfRevenues.wix;
+					restoLocoTotal += doc.data().sourcesOfRevenues.restoloco;
+					setAllRevenue((prev) => [...prev]);
+				});
+
+				setUberRevenue(Math.round(uberTotal));
+				setTpvRevenue(Math.round(tpvTotal));
+				setArgentRevenue(Math.round(argentTotal));
+				setDoordashRevenue(Math.round(doordashTotal));
+				setWixRevenue(Math.round(wixTotal));
+				setRestoLocoRevenue(Math.round(restoLocoTotal));
+				setRevenue(Math.round(total));
+				setData({
+					argent: argentTotal,
+					tpv: tpvTotal,
+					wix: wixTotal,
+					uber: uberTotal,
+					doordash: doordashTotal,
+					restoLoco: restoLocoTotal,
+				});
+			});
+		}
+	}, [activePeriod, activeRestaurant, startEndDate]);
+	//last day revenue section
 	useEffect(() => {
 		const date = new Date();
 		const currentYear = new Date().getFullYear();
@@ -301,26 +416,8 @@ function AttaboyRevenue() {
 			previousDay,
 			setLastDailyRevenue
 		);
-		// const lastDayRequest = query(
-		// 	collection(db, `ventes/${activeRestaurant}/${currentYear}`),
-		// 	where("timestamp", "==", previousDay)
-		// );
-		// let lastDayRevenue = 0;
-		// console.log(lastDayRequest);
-		// onSnapshot(lastDayRequest, (querySnapshot) => {
-		// 	if (querySnapshot.empty) {
-		// 		console.log("pas de revenus hier");
-		// 		setLastDailyRevenue(0);
-		// 	} else {
-		// 		querySnapshot.forEach((doc) => {
-		// 			console.log(doc.data().sourcesOfRevenues);
-		// 			lastDayRevenue = doc.data().total;
-		// 		});
-		// 		setLastDailyRevenue(lastDayRevenue);
-		// 	}
-		// });
 	}, [activeRestaurant]);
-	console.log(revenueMonthsBefore);
+	//weeks before section
 	useEffect(() => {
 		if (revenueWeeksBefore) {
 			revenueWeeksBefore.reverse();
@@ -374,6 +471,7 @@ function AttaboyRevenue() {
 			return null;
 		}
 	}, [revenueWeeksBefore]);
+	//month before section
 	useEffect(() => {
 		if (revenueMonthsBefore) {
 			console.log(revenueMonthsBefore);
@@ -432,8 +530,6 @@ function AttaboyRevenue() {
 			return null;
 		}
 	}, [revenueMonthsBefore]);
-	console.log(finalMonthArray);
-	console.log(finalCount);
 	return (
 		<>
 			<Box
@@ -587,6 +683,45 @@ function AttaboyRevenue() {
 					);
 				})}
 			</Box> */}
+			<TableContainer>
+				<Table>
+					<TableHead
+						sx={{
+							background: colorTheme,
+						}}
+					>
+						<TableRow>
+							<TableCell>Date</TableCell>
+							<TableCell>Argent</TableCell>
+							<TableCell>TPV</TableCell>
+							<TableCell>Wix</TableCell>
+							<TableCell>Resto Loco</TableCell>
+							<TableCell>Uber</TableCell>
+							<TableCell>Doordash</TableCell>
+							<TableCell>Total</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{specificPeriod?.map((element) => (
+							<TableRow
+								key={element.date}
+								sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+							>
+								<TableCell component="th" scope="row">
+									{element.date}
+								</TableCell>
+								<TableCell>{element.sourcesOfRevenues.argent}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.tpv}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.wix}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.restoloco}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.uber}$</TableCell>
+								<TableCell>{element.sourcesOfRevenues.doordash}$</TableCell>
+								<TableCell>{element.total}$</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
 		</>
 	);
 }

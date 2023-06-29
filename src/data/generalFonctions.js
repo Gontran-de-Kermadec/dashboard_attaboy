@@ -5,7 +5,8 @@ import {
 	getDocs,
 	onSnapshot,
 } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+import { db, auth } from "../firebaseConfig";
 
 export const ratioComparedToRevenue = (revenue, expense) => {
 	console.log(expense, revenue);
@@ -87,4 +88,27 @@ export const removeDoordashFees = (amount) => {
 };
 export const removeRestoLocoFees = (amount) => {
 	return amount - amount * (20 / 100);
+};
+
+export const checkUserLoggedIn = (context, relocate) => {
+	//useEffect(() => {
+	onAuthStateChanged(auth, (user) => {
+		console.log(user);
+		if (user) {
+			console.log("user");
+			//setUserLoggedIn(true);
+			context(true);
+			// User is signed in, see docs for a list of available properties
+			// https://firebase.google.com/docs/reference/js/auth.user
+			//const uid = user.uid;
+			// ...
+		} else {
+			console.log("no user relocate");
+			//setUserLoggedIn(false);
+			context(false);
+			relocate("/", { replace: true });
+			// navigate("/", { replace: true });
+		}
+	});
+	//	}, [setUserLoggedIn]);
 };

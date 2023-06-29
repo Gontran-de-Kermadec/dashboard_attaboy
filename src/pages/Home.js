@@ -18,6 +18,7 @@ import {
 	RestaurantContext,
 	ThemeContext,
 	StartEndDateContext,
+	UserContext,
 } from "../App";
 import Period from "../components/Period";
 import {
@@ -46,23 +47,27 @@ const Item = styled(Paper)(({ theme }) => ({
 
 function Home() {
 	const navigate = useNavigate();
-	//console.log(auth);
-	const [userLoggedIn, setUserLoggedIn] = useState(false);
-	onAuthStateChanged(auth, (user) => {
-		console.log(user);
-		if (user) {
-			console.log("user");
-			setUserLoggedIn(true);
-			// User is signed in, see docs for a list of available properties
-			// https://firebase.google.com/docs/reference/js/auth.user
-			//const uid = user.uid;
-			// ...
-		} else {
-			console.log("no user relocate");
-			setUserLoggedIn(false);
-			//navigate("/connexion", { replace: true });
-		}
-	});
+	const [userLoggedIn, setUserLoggedIn] = useContext(UserContext);
+	console.log(userLoggedIn);
+	//const [userLoggedIn, setUserLoggedIn] = useState(false);
+	useEffect(() => {
+		onAuthStateChanged(auth, (user) => {
+			console.log(user);
+			if (user) {
+				console.log("user");
+				setUserLoggedIn(true);
+				// User is signed in, see docs for a list of available properties
+				// https://firebase.google.com/docs/reference/js/auth.user
+				//const uid = user.uid;
+				// ...
+			} else {
+				console.log("no user relocate");
+				setUserLoggedIn(false);
+				//navigate("/connexion", { replace: true });
+			}
+		});
+	}, [setUserLoggedIn]);
+
 	//context const
 	const [activePeriod] = useContext(PeriodContext);
 	const [activeRestaurant] = useContext(RestaurantContext);

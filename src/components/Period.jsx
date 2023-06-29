@@ -68,7 +68,6 @@ function Period() {
 					value={activePeriod}
 					onChange={handleChange}
 					aria-label="tableau de periodes"
-					//indicatorColor="secondary"
 					TabIndicatorProps={{
 						style: {
 							backgroundColor: `${colorTheme}`,

@@ -13,6 +13,7 @@ export const PeriodContext = createContext();
 export const StartEndDateContext = createContext();
 export const RestaurantContext = createContext();
 export const ThemeContext = createContext();
+export const UserContext = createContext();
 
 function App() {
 	const soguaresTheme = "#b4a693";
@@ -23,6 +24,7 @@ function App() {
 	const [activeRestaurant, setActiveRestaurant] = useState("attaboy");
 	const [colorTheme, setColorTheme] = useState(attaboyTheme);
 	const [startEndDate, setStartEndDate] = useState(null);
+	const [userLoggedIn, setUserLoggedIn] = useState(false);
 
 	useEffect(() => {
 		const changeTheme = () => {
@@ -49,24 +51,28 @@ function App() {
 
 	return (
 		<>
-			<RestaurantContext.Provider
-				value={[activeRestaurant, setActiveRestaurant]}
-			>
-				<ThemeContext.Provider value={[colorTheme, setColorTheme]}>
-					<StartEndDateContext.Provider value={[startEndDate, setStartEndDate]}>
-						<PeriodContext.Provider value={[activePeriod, setActivePeriod]}>
-							<Routes>
-								<Route path="/" element={<Home />} />
-								<Route path="/connexion" element={<Authentication />} />
-								<Route path="/revenus" element={<Revenus />} />
-								<Route path="/caisse" element={<Caisse />} />
-								<Route path="/depenses" element={<Depenses />} />
-								<Route path="/employes" element={<Employes />} />
-							</Routes>
-						</PeriodContext.Provider>
-					</StartEndDateContext.Provider>
-				</ThemeContext.Provider>
-			</RestaurantContext.Provider>
+			<UserContext.Provider value={[userLoggedIn, setUserLoggedIn]}>
+				<RestaurantContext.Provider
+					value={[activeRestaurant, setActiveRestaurant]}
+				>
+					<ThemeContext.Provider value={[colorTheme, setColorTheme]}>
+						<StartEndDateContext.Provider
+							value={[startEndDate, setStartEndDate]}
+						>
+							<PeriodContext.Provider value={[activePeriod, setActivePeriod]}>
+								<Routes>
+									<Route path="/" element={<Home />} />
+									<Route path="/connexion" element={<Authentication />} />
+									<Route path="/revenus" element={<Revenus />} />
+									<Route path="/caisse" element={<Caisse />} />
+									<Route path="/depenses" element={<Depenses />} />
+									<Route path="/employes" element={<Employes />} />
+								</Routes>
+							</PeriodContext.Provider>
+						</StartEndDateContext.Provider>
+					</ThemeContext.Provider>
+				</RestaurantContext.Provider>
+			</UserContext.Provider>
 		</>
 	);
 }

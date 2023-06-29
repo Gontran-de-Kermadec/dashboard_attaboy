@@ -6,10 +6,8 @@ import {
 	// setDoc,
 	// addDoc,
 	// Timestamp,
-	getDoc,
 	collection,
 	query,
-	where,
 	// getDocs,
 	onSnapshot,
 	// deleteDoc
@@ -36,20 +34,24 @@ import {
 import { RestaurantContext, ThemeContext } from "../App";
 import EmployeeForm from "../components/EmployeeForm";
 import "../App.css";
+import Authentication from "./Authentication";
+import { checkUserLoggedIn } from "../data/generalFonctions";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../App";
 // const SpanItem = styled(Box)(({ theme }) => ({
 // 	fontWeight: "bold",
 // }));
 
 function Employes() {
+	const [userLoggedIn, setUserLoggedIn] = useContext(UserContext);
 	const [activeRestaurant] = useContext(RestaurantContext);
 	const [colorTheme] = useContext(ThemeContext);
 
 	const [activeEmployee, setActiveEmployee] = useState();
 	const [employeesDatas, setEmployeesDatas] = useState([]);
-	const [testEmployee, setTestEmployee] = useState([]);
 
-	const [currentField, setCurrentField] = useState("");
-	const [parentToElement, setParentToElement] = useState("");
+	const navigate = useNavigate();
+	checkUserLoggedIn(setUserLoggedIn, navigate);
 	const [userId, setUserId] = useState();
 	const [open, setOpen] = useState(false);
 	const handleOpen = () => setOpen(true);
@@ -197,9 +199,6 @@ function Employes() {
 		const formattedDate = new Date(month + "/" + day + "/" + year);
 		console.log(formattedDate);
 		setBirthDate(month + "/" + day + "/" + year);
-		//const timestampFormat = Timestamp.fromDate(e.$d);
-		//setTimeStampDate(timestampFormat);
-		// setError(false);
 	};
 	const CardButton = styled(Button)(({ theme }) => ({
 		background: colorTheme,
@@ -229,139 +228,138 @@ function Employes() {
 				dataWithDocId.documentId = doc.id;
 				dataToDisplay.push(dataWithDocId);
 			});
-			console.log(dataToDisplay);
 			setEmployeesDatas(dataToDisplay);
 		});
 	}, [activeRestaurant]);
 
-	console.log(employeesDatas);
 	return (
 		<>
-			<div className="flex">
-				<Sidebar />
-				<Box
-					sx={{
-						width: "100%",
-					}}
-				>
-					<Button
-						onClick={handleOpen}
-						sx={{
-							left: "50%",
-							transform: "translateX(-50%)",
-							background: colorTheme,
-							boxShadow: 2,
-							fontSize: "1.2em",
-							color: "#fff",
-							margin: "2em auto",
-							"&:hover": {
-								color: colorTheme,
-							},
-						}}
-					>
-						Ajouter un collègue !
-					</Button>
-					<Modal
-						open={open}
-						onClose={handleClose}
-						aria-labelledby="add-employee-modal"
-						aria-describedby="modal-modal-description"
-					>
-						<div>
-							<EmployeeForm handleClose={handleClose} />
-						</div>
-					</Modal>
-					<Typography>
-						Nombre total de collègues: {employeesDatas.length}
-					</Typography>
+			{userLoggedIn ? (
+				<div className="flex">
+					<Sidebar />
 					<Box
 						sx={{
-							display: "flex",
-							justifyContent: "space-around",
+							width: "100%",
 						}}
 					>
-						<Box>
-							{employeesDatas?.map((employee) => {
-								return (
-									<Typography
-										key={employee.documentId}
-										onClick={() =>
-											setActiveEmployee(employee.personnal_infos.lastName)
-										}
-										sx={{
-											margin: "1em 0",
-											boxShadow: 2,
-											padding: "1em 2em",
-										}}
-									>
-										{employee.personnal_infos.firstName}{" "}
-										{employee.personnal_infos.lastName}
-									</Typography>
-								);
-							})}
-						</Box>
+						<Button
+							onClick={handleOpen}
+							sx={{
+								left: "50%",
+								transform: "translateX(-50%)",
+								background: colorTheme,
+								boxShadow: 2,
+								fontSize: "1.2em",
+								color: "#fff",
+								margin: "2em auto",
+								"&:hover": {
+									color: colorTheme,
+								},
+							}}
+						>
+							Ajouter un collègue !
+						</Button>
+						<Modal
+							open={open}
+							onClose={handleClose}
+							aria-labelledby="add-employee-modal"
+							aria-describedby="modal-modal-description"
+						>
+							<div>
+								<EmployeeForm handleClose={handleClose} />
+							</div>
+						</Modal>
+						<Typography>
+							Nombre total de collègues: {employeesDatas.length}
+						</Typography>
 						<Box
 							sx={{
-								width: "70%",
+								display: "flex",
+								justifyContent: "space-around",
 							}}
 						>
 							<Box>
 								{employeesDatas?.map((employee) => {
-									return activeEmployee ===
-										employee.personnal_infos.lastName ? (
-										<Container
+									return (
+										<Typography
 											key={employee.documentId}
+											onClick={() =>
+												setActiveEmployee(employee.personnal_infos.lastName)
+											}
 											sx={{
-												width: "80%",
+												margin: "1em 0",
 												boxShadow: 2,
-												padding: "1em",
+												padding: "1em 2em",
 											}}
 										>
-											<Typography
+											{employee.personnal_infos.firstName}{" "}
+											{employee.personnal_infos.lastName}
+										</Typography>
+									);
+								})}
+							</Box>
+							<Box
+								sx={{
+									width: "70%",
+								}}
+							>
+								<Box>
+									{employeesDatas?.map((employee) => {
+										return activeEmployee ===
+											employee.personnal_infos.lastName ? (
+											<Container
+												key={employee.documentId}
 												sx={{
-													textAlign: "center",
-													fontSize: "2em",
+													width: "80%",
+													boxShadow: 2,
+													padding: "1em",
 												}}
 											>
-												{employee.personnal_infos.firstName}{" "}
-												{employee.personnal_infos.lastName}
-											</Typography>
-											<Box>
-												<Container
+												<Typography
 													sx={{
-														display: "flex",
-														justifyContent: "space-between",
-														"&:hover .MuiTypography-root:nth-of-type(even)": {
-															//color: "red",
-															opacity: "1",
-														},
+														textAlign: "center",
+														fontSize: "2em",
 													}}
-													className="hover"
 												>
-													<CardTitle>Renseignements personnels</CardTitle>
-													<Typography
-														sx={{
-															color: colorTheme,
-															opacity: "0",
-														}}
-														onClick={() =>
-															// handleOpenUpdate(
-															handleOpenPersonnalInfos(
-																employee.documentId,
-																"personnal_infos",
-																employee.personnal_infos
-															)
-														}
-													>
-														{" "}
-														edit
-													</Typography>
-												</Container>
-												<Typography>
-													<SpanItem component="span">Nom : </SpanItem>
+													{employee.personnal_infos.firstName}{" "}
 													{employee.personnal_infos.lastName}
 												</Typography>
-												{/* <Box
+												<Box>
+													<Container
+														sx={{
+															display: "flex",
+															justifyContent: "space-between",
+															"&:hover .MuiTypography-root:nth-of-type(even)": {
+																//color: "red",
+																opacity: "1",
+															},
+														}}
+														className="hover"
+													>
+														<CardTitle>Renseignements personnels</CardTitle>
+														<Typography
+															sx={{
+																color: colorTheme,
+																opacity: "0",
+															}}
+															onClick={() =>
+																// handleOpenUpdate(
+																handleOpenPersonnalInfos(
+																	employee.documentId,
+																	"personnal_infos",
+																	employee.personnal_infos
+																)
+															}
+														>
+															{" "}
+															edit
+														</Typography>
+													</Container>
+													<Typography>
+														<SpanItem component="span">Nom : </SpanItem>
+														{employee.personnal_infos.lastName}
+													</Typography>
+													{/* <Box
 													sx={{
 														display: "flex",
 														justifyContent: "space-between",
@@ -394,222 +392,224 @@ function Employes() {
 													</Typography>
 												</Box> */}
 
-												<Typography>
-													<SpanItem component="span">Prénom : </SpanItem>{" "}
-													{employee.personnal_infos.firstName}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">
-														Date de naissance :{" "}
-													</SpanItem>
-													{employee.personnal_infos.birthDate}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">Adresse : </SpanItem>
-													{employee.personnal_infos.address}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">Email : </SpanItem>
-													{employee.personnal_infos.email}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">
-														Numéro de cellulaire :{" "}
-													</SpanItem>
-													{employee.personnal_infos.cellNumber}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">
-														Numéro d'assurance sociale :{" "}
-													</SpanItem>
-													{employee.personnal_infos.nas}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">Salaire : </SpanItem>
-													{employee.personnal_infos.hourlySalary !== ""
-														? employee.personnal_infos.hourlySalary + "$"
-														: " "}
-												</Typography>
-											</Box>
-											<Box>
-												<Container
-													sx={{
-														display: "flex",
-														justifyContent: "space-between",
-														"&:hover .MuiTypography-root:nth-of-type(even)": {
-															opacity: "1",
-														},
-													}}
-													className="hover"
-												>
-													<CardTitle>Contact en cas d'urgence</CardTitle>
-													<Typography
-														sx={{
-															color: colorTheme,
-															opacity: "0",
-														}}
-														onClick={() => {
-															//console.log("cooool");
-															handleOpenEmergencyInfos(
-																employee.documentId,
-																"emergency_infos",
-																employee.emergency_infos
-															);
-														}}
-													>
-														{" "}
-														edit
+													<Typography>
+														<SpanItem component="span">Prénom : </SpanItem>{" "}
+														{employee.personnal_infos.firstName}
 													</Typography>
-												</Container>
-												<Typography>
-													<SpanItem component="span">Nom : </SpanItem>
-													{employee.emergency_infos.familyName}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">Prénom : </SpanItem>
-													{employee.emergency_infos.name}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">
-														Relation (ex: père, mère, ...) :{" "}
-													</SpanItem>
-													{employee.emergency_infos.relative}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">
-														Numéro de cellulaire :{" "}
-													</SpanItem>
-													{employee.emergency_infos.relativeNumber}
-												</Typography>
-											</Box>
-											<Box>
-												<Container
-													sx={{
-														display: "flex",
-														justifyContent: "space-between",
-														"&:hover .MuiTypography-root:nth-of-type(even)": {
-															opacity: "1",
-														},
-													}}
-													className="hover"
-												>
-													<CardTitle>Informations bancaires</CardTitle>
-													<Typography
-														sx={{
-															color: colorTheme,
-															opacity: "0",
-														}}
-														onClick={() => {
-															//console.log("cooool");
-															handleOpenBankInfos(
-																employee.documentId,
-																"bank_infos",
-																employee.bank_infos
-															);
-														}}
-													>
-														{" "}
-														edit
+													<Typography>
+														<SpanItem component="span">
+															Date de naissance :{" "}
+														</SpanItem>
+														{employee.personnal_infos.birthDate}
 													</Typography>
-												</Container>
-												<Typography>
-													<SpanItem component="span">
-														Numéro de transit :{" "}
-													</SpanItem>
-													{employee.bank_infos.transitNumber}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">
-														Numéro de succursale :{" "}
-													</SpanItem>
-													{employee.bank_infos.branchNumber}
-												</Typography>
-												<Typography>
-													<SpanItem component="span">
-														Numéro de compte :{" "}
-													</SpanItem>
-													{employee.bank_infos.accountNumber}
-												</Typography>
-											</Box>
-											<Box
-												sx={{
-													marginTop: "1em",
-													textAlign: "center",
-												}}
-											>
-												<CardButton
-													onClick={() => handleOpenDelete(employee.documentId)}
+													<Typography>
+														<SpanItem component="span">Adresse : </SpanItem>
+														{employee.personnal_infos.address}
+													</Typography>
+													<Typography>
+														<SpanItem component="span">Email : </SpanItem>
+														{employee.personnal_infos.email}
+													</Typography>
+													<Typography>
+														<SpanItem component="span">
+															Numéro de cellulaire :{" "}
+														</SpanItem>
+														{employee.personnal_infos.cellNumber}
+													</Typography>
+													<Typography>
+														<SpanItem component="span">
+															Numéro d'assurance sociale :{" "}
+														</SpanItem>
+														{employee.personnal_infos.nas}
+													</Typography>
+													<Typography>
+														<SpanItem component="span">Salaire : </SpanItem>
+														{employee.personnal_infos.hourlySalary !== ""
+															? employee.personnal_infos.hourlySalary + "$"
+															: " "}
+													</Typography>
+												</Box>
+												<Box>
+													<Container
+														sx={{
+															display: "flex",
+															justifyContent: "space-between",
+															"&:hover .MuiTypography-root:nth-of-type(even)": {
+																opacity: "1",
+															},
+														}}
+														className="hover"
+													>
+														<CardTitle>Contact en cas d'urgence</CardTitle>
+														<Typography
+															sx={{
+																color: colorTheme,
+																opacity: "0",
+															}}
+															onClick={() => {
+																//console.log("cooool");
+																handleOpenEmergencyInfos(
+																	employee.documentId,
+																	"emergency_infos",
+																	employee.emergency_infos
+																);
+															}}
+														>
+															{" "}
+															edit
+														</Typography>
+													</Container>
+													<Typography>
+														<SpanItem component="span">Nom : </SpanItem>
+														{employee.emergency_infos.familyName}
+													</Typography>
+													<Typography>
+														<SpanItem component="span">Prénom : </SpanItem>
+														{employee.emergency_infos.name}
+													</Typography>
+													<Typography>
+														<SpanItem component="span">
+															Relation (ex: père, mère, ...) :{" "}
+														</SpanItem>
+														{employee.emergency_infos.relative}
+													</Typography>
+													<Typography>
+														<SpanItem component="span">
+															Numéro de cellulaire :{" "}
+														</SpanItem>
+														{employee.emergency_infos.relativeNumber}
+													</Typography>
+												</Box>
+												<Box>
+													<Container
+														sx={{
+															display: "flex",
+															justifyContent: "space-between",
+															"&:hover .MuiTypography-root:nth-of-type(even)": {
+																opacity: "1",
+															},
+														}}
+														className="hover"
+													>
+														<CardTitle>Informations bancaires</CardTitle>
+														<Typography
+															sx={{
+																color: colorTheme,
+																opacity: "0",
+															}}
+															onClick={() => {
+																//console.log("cooool");
+																handleOpenBankInfos(
+																	employee.documentId,
+																	"bank_infos",
+																	employee.bank_infos
+																);
+															}}
+														>
+															{" "}
+															edit
+														</Typography>
+													</Container>
+													<Typography>
+														<SpanItem component="span">
+															Numéro de transit :{" "}
+														</SpanItem>
+														{employee.bank_infos.transitNumber}
+													</Typography>
+													<Typography>
+														<SpanItem component="span">
+															Numéro de succursale :{" "}
+														</SpanItem>
+														{employee.bank_infos.branchNumber}
+													</Typography>
+													<Typography>
+														<SpanItem component="span">
+															Numéro de compte :{" "}
+														</SpanItem>
+														{employee.bank_infos.accountNumber}
+													</Typography>
+												</Box>
+												<Box
+													sx={{
+														marginTop: "1em",
+														textAlign: "center",
+													}}
 												>
-													Supprimer {employee.personnal_infos.firstName}
-												</CardButton>
-											</Box>
-										</Container>
-									) : null;
-								})}
+													<CardButton
+														onClick={() =>
+															handleOpenDelete(employee.documentId)
+														}
+													>
+														Supprimer {employee.personnal_infos.firstName}
+													</CardButton>
+												</Box>
+											</Container>
+										) : null;
+									})}
+								</Box>
 							</Box>
 						</Box>
-					</Box>
-					<Modal
-						open={openDelete}
-						onClose={handleCloseDelete}
-						aria-labelledby="delete-employee-modal"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-							<Typography
-								sx={{
-									textAlign: "center",
-									fontSize: "2em",
-								}}
-							>
-								C'est sûr !?
-							</Typography>
-							<Box
-								sx={{
-									display: "flex",
-									justifyContent: "space-around",
-									marginTop: "2em",
-								}}
-							>
-								<Button
-									onClick={handleDeleteEmployee}
+						<Modal
+							open={openDelete}
+							onClose={handleCloseDelete}
+							aria-labelledby="delete-employee-modal"
+							aria-describedby="modal-modal-description"
+						>
+							<Box sx={style}>
+								<Typography
 									sx={{
-										fontSize: "1.2em",
-										background: colorTheme,
-										color: "#fff",
-										"&:hover": {
-											background: "#fff",
-											color: colorTheme,
-										},
+										textAlign: "center",
+										fontSize: "2em",
 									}}
 								>
-									Oui
-								</Button>
-								<Button
-									onClick={handleCloseDelete}
+									C'est sûr !?
+								</Typography>
+								<Box
 									sx={{
-										fontSize: "1.2em",
-										background: colorTheme,
-										color: "#fff",
-										"&:hover": {
-											background: "#fff",
-											color: colorTheme,
-										},
+										display: "flex",
+										justifyContent: "space-around",
+										marginTop: "2em",
 									}}
 								>
-									Non
-								</Button>
+									<Button
+										onClick={handleDeleteEmployee}
+										sx={{
+											fontSize: "1.2em",
+											background: colorTheme,
+											color: "#fff",
+											"&:hover": {
+												background: "#fff",
+												color: colorTheme,
+											},
+										}}
+									>
+										Oui
+									</Button>
+									<Button
+										onClick={handleCloseDelete}
+										sx={{
+											fontSize: "1.2em",
+											background: colorTheme,
+											color: "#fff",
+											"&:hover": {
+												background: "#fff",
+												color: colorTheme,
+											},
+										}}
+									>
+										Non
+									</Button>
+								</Box>
 							</Box>
-						</Box>
-					</Modal>
-					<Modal
-						open={openUpdatePersonnalInfos}
-						onClose={handleCloseUpdatePersonnalInfos}
-						aria-labelledby="update-employee-modal"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-							{/* <Typography
+						</Modal>
+						<Modal
+							open={openUpdatePersonnalInfos}
+							onClose={handleCloseUpdatePersonnalInfos}
+							aria-labelledby="update-employee-modal"
+							aria-describedby="modal-modal-description"
+						>
+							<Box sx={style}>
+								{/* <Typography
 								sx={{
 									textAlign: "center",
 									//fontSize: "2em",
@@ -617,155 +617,155 @@ function Employes() {
 							>
 								Nouveau {fieldNameFrench?.toLowerCase()}
 							</Typography> */}
-							<Box
-								sx={{
-									display: "flex",
-									justifyContent: "space-around",
-									marginTop: "2em",
-								}}
-							>
 								<Box
-									component="form"
 									sx={{
-										padding: "1em",
-										"& .MuiTextField-root": { m: 1, width: "100%" },
+										display: "flex",
+										justifyContent: "space-around",
+										marginTop: "2em",
 									}}
-									noValidate
-									autoComplete="off"
-									onSubmit={handleUpdate}
 								>
-									<Box>
-										{/* <TextField
+									<Box
+										component="form"
+										sx={{
+											padding: "1em",
+											"& .MuiTextField-root": { m: 1, width: "100%" },
+										}}
+										noValidate
+										autoComplete="off"
+										onSubmit={handleUpdate}
+									>
+										<Box>
+											{/* <TextField
 											id="outlined-required"
 											//label={fieldNameFrench}
 											onChange={(e) => setUpdatedValue(e.target.value)}
 										/> */}
-										{sectionDatas ? (
-											<>
-												<Typography
-													sx={{
-														textAlign: "center",
-														//fontSize: "2em",
-													}}
-												>
-													{sectionDatasTitle}
-												</Typography>
-												<TextField
-													id="outlined-required"
-													label={
-														sectionDatas.lastName !== ""
-															? sectionDatas.lastName
-															: "Nom"
-													}
-													onChange={(e) => setNewFamilyName(e.target.value)}
-												/>
-												<TextField
-													id="outlined-required"
-													label={sectionDatas.firstName}
-													onChange={(e) => setNewFirstName(e.target.value)}
-												/>
-												{/* <TextField
+											{sectionDatas ? (
+												<>
+													<Typography
+														sx={{
+															textAlign: "center",
+															//fontSize: "2em",
+														}}
+													>
+														{sectionDatasTitle}
+													</Typography>
+													<TextField
+														id="outlined-required"
+														label={
+															sectionDatas.lastName !== ""
+																? sectionDatas.lastName
+																: "Nom"
+														}
+														onChange={(e) => setNewFamilyName(e.target.value)}
+													/>
+													<TextField
+														id="outlined-required"
+														label={sectionDatas.firstName}
+														onChange={(e) => setNewFirstName(e.target.value)}
+													/>
+													{/* <TextField
 													id="outlined-required"
 													label={sectionDatas.birthDate}
 													onChange={(e) => setBirthDate(e.target.value)}
 												/> */}
-												<LocalizationProvider dateAdapter={AdapterDayjs}>
-													<DatePicker
-														sx={{
-															left: "50%",
-															transform: "translateX(-50%)",
-															width: "100%",
-														}}
-														onChange={(e) => {
-															getSelectedDate(e);
-														}}
-														//label="Date de naissance"
+													<LocalizationProvider dateAdapter={AdapterDayjs}>
+														<DatePicker
+															sx={{
+																left: "50%",
+																transform: "translateX(-50%)",
+																width: "100%",
+															}}
+															onChange={(e) => {
+																getSelectedDate(e);
+															}}
+															//label="Date de naissance"
+															label={
+																sectionDatas.birthDate !== ""
+																	? sectionDatas.birthDate
+																	: "Date de naissance"
+															}
+															disableFuture
+															//onError={(newError) => setError(newError)}
+															//error={error}
+															//helperText={helperText}
+															// slotProps={{
+															// 	textField: {
+															// 		helperText: errorMessage,
+															// 	},
+															// }}
+														/>
+													</LocalizationProvider>
+													<TextField
+														id="outlined-required"
 														label={
-															sectionDatas.birthDate !== ""
-																? sectionDatas.birthDate
-																: "Date de naissance"
+															sectionDatas.address !== ""
+																? sectionDatas.address
+																: "Adresse"
 														}
-														disableFuture
-														//onError={(newError) => setError(newError)}
-														//error={error}
-														//helperText={helperText}
-														// slotProps={{
-														// 	textField: {
-														// 		helperText: errorMessage,
-														// 	},
-														// }}
+														onChange={(e) => setAddress(e.target.value)}
 													/>
-												</LocalizationProvider>
-												<TextField
-													id="outlined-required"
-													label={
-														sectionDatas.address !== ""
-															? sectionDatas.address
-															: "Adresse"
-													}
-													onChange={(e) => setAddress(e.target.value)}
-												/>
-												<TextField
-													id="outlined-required"
-													//label={sectionDatas.email}
-													label={
-														sectionDatas.email !== ""
-															? sectionDatas.email
-															: "Email"
-													}
-													onChange={(e) => setEmail(e.target.value)}
-												/>
-												<TextField
-													id="outlined-required"
-													//label={sectionDatas.cellNumber}
-													label={
-														sectionDatas.cellNumber !== ""
-															? sectionDatas.cellNumber
-															: "Numéro de cellulaire"
-													}
-													onChange={(e) => setCellNumber(e.target.value)}
-												/>
-												<TextField
-													id="outlined-required"
-													//label={sectionDatas.nas}
-													label={
-														sectionDatas.nas !== ""
-															? sectionDatas.nas
-															: "Numéro d'assurance sociale"
-													}
-													onChange={(e) => setNas(e.target.value)}
-												/>
-												<TextField
-													id="outlined-required"
-													//label={sectionDatas.nas}
-													label={
-														sectionDatas.hourlySalary !== ""
-															? sectionDatas.hourlySalary
-															: "Salaire"
-													}
-													onChange={(e) => setHourlySalary(e.target.value)}
-												/>
-											</>
-										) : (
-											<p>null</p>
-										)}
+													<TextField
+														id="outlined-required"
+														//label={sectionDatas.email}
+														label={
+															sectionDatas.email !== ""
+																? sectionDatas.email
+																: "Email"
+														}
+														onChange={(e) => setEmail(e.target.value)}
+													/>
+													<TextField
+														id="outlined-required"
+														//label={sectionDatas.cellNumber}
+														label={
+															sectionDatas.cellNumber !== ""
+																? sectionDatas.cellNumber
+																: "Numéro de cellulaire"
+														}
+														onChange={(e) => setCellNumber(e.target.value)}
+													/>
+													<TextField
+														id="outlined-required"
+														//label={sectionDatas.nas}
+														label={
+															sectionDatas.nas !== ""
+																? sectionDatas.nas
+																: "Numéro d'assurance sociale"
+														}
+														onChange={(e) => setNas(e.target.value)}
+													/>
+													<TextField
+														id="outlined-required"
+														//label={sectionDatas.nas}
+														label={
+															sectionDatas.hourlySalary !== ""
+																? sectionDatas.hourlySalary
+																: "Salaire"
+														}
+														onChange={(e) => setHourlySalary(e.target.value)}
+													/>
+												</>
+											) : (
+												<p>null</p>
+											)}
+										</Box>
+										<Button
+											type="submit"
+											sx={{
+												background: colorTheme,
+												color: "#fff",
+												fontSize: "1.2em",
+												"&:hover": {
+													color: colorTheme,
+													background: "#fff",
+												},
+											}}
+										>
+											Modifier
+										</Button>
 									</Box>
-									<Button
-										type="submit"
-										sx={{
-											background: colorTheme,
-											color: "#fff",
-											fontSize: "1.2em",
-											"&:hover": {
-												color: colorTheme,
-												background: "#fff",
-											},
-										}}
-									>
-										Modifier
-									</Button>
-								</Box>
-								{/* <Button
+									{/* <Button
 									onClick={handleDeleteEmployee}
 									sx={{
 										fontSize: "1.2em",
@@ -793,17 +793,17 @@ function Employes() {
 								>
 									Non
 								</Button> */}
+								</Box>
 							</Box>
-						</Box>
-					</Modal>
-					<Modal
-						open={openUpdateEmergencyInfos}
-						onClose={handleCloseUpdateEmergencyInfos}
-						aria-labelledby="update-employee-modal"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-							{/* <Typography
+						</Modal>
+						<Modal
+							open={openUpdateEmergencyInfos}
+							onClose={handleCloseUpdateEmergencyInfos}
+							aria-labelledby="update-employee-modal"
+							aria-describedby="modal-modal-description"
+						>
+							<Box sx={style}>
+								{/* <Typography
 								sx={{
 									textAlign: "center",
 									//fontSize: "2em",
@@ -811,97 +811,97 @@ function Employes() {
 							>
 								Nouveau {fieldNameFrench?.toLowerCase()}
 							</Typography> */}
-							<Box
-								sx={{
-									display: "flex",
-									justifyContent: "space-around",
-									marginTop: "2em",
-								}}
-							>
 								<Box
-									component="form"
 									sx={{
-										padding: "1em",
-										"& .MuiTextField-root": { m: 1, width: "100%" },
+										display: "flex",
+										justifyContent: "space-around",
+										marginTop: "2em",
 									}}
-									noValidate
-									autoComplete="off"
-									onSubmit={handleUpdate}
 								>
-									<Box>
-										{/* <TextField
+									<Box
+										component="form"
+										sx={{
+											padding: "1em",
+											"& .MuiTextField-root": { m: 1, width: "100%" },
+										}}
+										noValidate
+										autoComplete="off"
+										onSubmit={handleUpdate}
+									>
+										<Box>
+											{/* <TextField
 											id="outlined-required"
 											//label={fieldNameFrench}
 											onChange={(e) => setUpdatedValue(e.target.value)}
 										/> */}
-										{sectionDatas ? (
-											<>
-												<Typography
-													sx={{
-														textAlign: "center",
-														//fontSize: "2em",
-													}}
-												>
-													{sectionDatasTitle}
-												</Typography>
-												<TextField
-													id="outlined-required"
-													label={
-														sectionDatas.familyName !== ""
-															? sectionDatas.familyName
-															: "Nom"
-													}
-													onChange={(e) => setFamilyName(e.target.value)}
-												/>
-												<TextField
-													id="outlined-required"
-													label={
-														sectionDatas.name !== ""
-															? sectionDatas.name
-															: "Prénom"
-													}
-													onChange={(e) => setName(e.target.value)}
-												/>
+											{sectionDatas ? (
+												<>
+													<Typography
+														sx={{
+															textAlign: "center",
+															//fontSize: "2em",
+														}}
+													>
+														{sectionDatasTitle}
+													</Typography>
+													<TextField
+														id="outlined-required"
+														label={
+															sectionDatas.familyName !== ""
+																? sectionDatas.familyName
+																: "Nom"
+														}
+														onChange={(e) => setFamilyName(e.target.value)}
+													/>
+													<TextField
+														id="outlined-required"
+														label={
+															sectionDatas.name !== ""
+																? sectionDatas.name
+																: "Prénom"
+														}
+														onChange={(e) => setName(e.target.value)}
+													/>
 
-												<TextField
-													id="outlined-required"
-													label={
-														sectionDatas.relative !== ""
-															? sectionDatas.relative
-															: "Relation"
-													}
-													onChange={(e) => setRelative(e.target.value)}
-												/>
-												<TextField
-													id="outlined-required"
-													label={
-														sectionDatas.relativeNumber !== ""
-															? sectionDatas.relativeNumber
-															: "Numéro de cellulaire"
-													}
-													onChange={(e) => setRelativeNumber(e.target.value)}
-												/>
-											</>
-										) : (
-											<p>null</p>
-										)}
+													<TextField
+														id="outlined-required"
+														label={
+															sectionDatas.relative !== ""
+																? sectionDatas.relative
+																: "Relation"
+														}
+														onChange={(e) => setRelative(e.target.value)}
+													/>
+													<TextField
+														id="outlined-required"
+														label={
+															sectionDatas.relativeNumber !== ""
+																? sectionDatas.relativeNumber
+																: "Numéro de cellulaire"
+														}
+														onChange={(e) => setRelativeNumber(e.target.value)}
+													/>
+												</>
+											) : (
+												<p>null</p>
+											)}
+										</Box>
+										<Button
+											type="submit"
+											sx={{
+												background: colorTheme,
+												color: "#fff",
+												fontSize: "1.2em",
+												"&:hover": {
+													color: colorTheme,
+													background: "#fff",
+												},
+											}}
+										>
+											Modifier
+										</Button>
 									</Box>
-									<Button
-										type="submit"
-										sx={{
-											background: colorTheme,
-											color: "#fff",
-											fontSize: "1.2em",
-											"&:hover": {
-												color: colorTheme,
-												background: "#fff",
-											},
-										}}
-									>
-										Modifier
-									</Button>
-								</Box>
-								{/* <Button
+									{/* <Button
 									onClick={handleDeleteEmployee}
 									sx={{
 										fontSize: "1.2em",
@@ -929,17 +929,17 @@ function Employes() {
 								>
 									Non
 								</Button> */}
+								</Box>
 							</Box>
-						</Box>
-					</Modal>
-					<Modal
-						open={openUpdateBankInfos}
-						onClose={handleCloseUpdateBankInfos}
-						aria-labelledby="update-employee-modal"
-						aria-describedby="modal-modal-description"
-					>
-						<Box sx={style}>
-							{/* <Typography
+						</Modal>
+						<Modal
+							open={openUpdateBankInfos}
+							onClose={handleCloseUpdateBankInfos}
+							aria-labelledby="update-employee-modal"
+							aria-describedby="modal-modal-description"
+						>
+							<Box sx={style}>
+								{/* <Typography
 								sx={{
 									textAlign: "center",
 									//fontSize: "2em",
@@ -947,88 +947,88 @@ function Employes() {
 							>
 								Nouveau {fieldNameFrench?.toLowerCase()}
 							</Typography> */}
-							<Box
-								sx={{
-									display: "flex",
-									justifyContent: "space-around",
-									marginTop: "2em",
-								}}
-							>
 								<Box
-									component="form"
 									sx={{
-										padding: "1em",
-										"& .MuiTextField-root": { m: 1, width: "100%" },
+										display: "flex",
+										justifyContent: "space-around",
+										marginTop: "2em",
 									}}
-									noValidate
-									autoComplete="off"
-									onSubmit={handleUpdate}
 								>
-									<Box>
-										{/* <TextField
+									<Box
+										component="form"
+										sx={{
+											padding: "1em",
+											"& .MuiTextField-root": { m: 1, width: "100%" },
+										}}
+										noValidate
+										autoComplete="off"
+										onSubmit={handleUpdate}
+									>
+										<Box>
+											{/* <TextField
 											id="outlined-required"
 											//label={fieldNameFrench}
 											onChange={(e) => setUpdatedValue(e.target.value)}
 										/> */}
-										{sectionDatas ? (
-											<>
-												<Typography
-													sx={{
-														textAlign: "center",
-														//fontSize: "2em",
-													}}
-												>
-													{sectionDatasTitle}
-												</Typography>
-												<TextField
-													id="outlined-required"
-													label={
-														sectionDatas.accountNumber !== ""
-															? sectionDatas.accountNumber
-															: "Numéro de compte"
-													}
-													onChange={(e) => setAccountNumber(e.target.value)}
-												/>
-												<TextField
-													id="outlined-required"
-													label={
-														sectionDatas.branchNumber !== ""
-															? sectionDatas.branchNumber
-															: "Numéro de succursale"
-													}
-													onChange={(e) => setBranchNumber(e.target.value)}
-												/>
+											{sectionDatas ? (
+												<>
+													<Typography
+														sx={{
+															textAlign: "center",
+															//fontSize: "2em",
+														}}
+													>
+														{sectionDatasTitle}
+													</Typography>
+													<TextField
+														id="outlined-required"
+														label={
+															sectionDatas.accountNumber !== ""
+																? sectionDatas.accountNumber
+																: "Numéro de compte"
+														}
+														onChange={(e) => setAccountNumber(e.target.value)}
+													/>
+													<TextField
+														id="outlined-required"
+														label={
+															sectionDatas.branchNumber !== ""
+																? sectionDatas.branchNumber
+																: "Numéro de succursale"
+														}
+														onChange={(e) => setBranchNumber(e.target.value)}
+													/>
 
-												<TextField
-													id="outlined-required"
-													label={
-														sectionDatas.transitNumber !== ""
-															? sectionDatas.transitNumber
-															: "Numéro de transit"
-													}
-													onChange={(e) => setTransitNumber(e.target.value)}
-												/>
-											</>
-										) : (
-											<p>null</p>
-										)}
+													<TextField
+														id="outlined-required"
+														label={
+															sectionDatas.transitNumber !== ""
+																? sectionDatas.transitNumber
+																: "Numéro de transit"
+														}
+														onChange={(e) => setTransitNumber(e.target.value)}
+													/>
+												</>
+											) : (
+												<p>null</p>
+											)}
+										</Box>
+										<Button
+											type="submit"
+											sx={{
+												background: colorTheme,
+												color: "#fff",
+												fontSize: "1.2em",
+												"&:hover": {
+													color: colorTheme,
+													background: "#fff",
+												},
+											}}
+										>
+											Modifier
+										</Button>
 									</Box>
-									<Button
-										type="submit"
-										sx={{
-											background: colorTheme,
-											color: "#fff",
-											fontSize: "1.2em",
-											"&:hover": {
-												color: colorTheme,
-												background: "#fff",
-											},
-										}}
-									>
-										Modifier
-									</Button>
-								</Box>
-								{/* <Button
+									{/* <Button
 									onClick={handleDeleteEmployee}
 									sx={{
 										fontSize: "1.2em",
@@ -1056,11 +1056,14 @@ function Employes() {
 								>
 									Non
 								</Button> */}
+								</Box>
 							</Box>
-						</Box>
-					</Modal>
-				</Box>
-			</div>
+						</Modal>
+					</Box>
+				</div>
+			) : (
+				<Authentication />
+			)}
 		</>
 	);
 }

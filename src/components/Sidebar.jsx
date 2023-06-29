@@ -16,8 +16,10 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { KeyboardArrowDown } from "@mui/icons-material";
-import { RestaurantContext, ThemeContext } from "../App";
+import { RestaurantContext, ThemeContext, UserContext } from "../App";
 import { hex2rgba } from "../data/generalFonctions";
+import { auth } from "../firebaseConfig";
+import { signOut } from "firebase/auth";
 
 // import { useNavigate, Link } from "react-router-dom";
 
@@ -26,6 +28,7 @@ function Sidebar() {
 	const open = Boolean(anchorEl);
 	console.log(open);
 	// const [store, setStore] = useState("Attaboy");
+	const [userLoggedIn, setUserLoggedIn] = useContext(UserContext);
 	const [activeRestaurant, setActiveRestaurant] = useContext(RestaurantContext);
 	const [colorTheme] = useContext(ThemeContext);
 	const selectStore = (e) => {
@@ -38,7 +41,17 @@ function Sidebar() {
 	const handleClose = () => {
 		setAnchorEl(null);
 	};
-	// const menuItems = ["Caisse", "Revenus", "Dépenses"];
+	const logOut = () => {
+		signOut(auth)
+			.then(() => {
+				// Sign-out successful.
+				setUserLoggedIn(false);
+			})
+			.catch((error) => {
+				// An error happened.
+				console.log(error);
+			});
+	};
 	const menu = [
 		{
 			title: "Vue d'ensemble",
@@ -201,6 +214,24 @@ function Sidebar() {
 						</div>
 					))}
 				</List>
+				<Box>
+					<Button
+						sx={{
+							width: "100%",
+							// color: "white",
+							// backgroundColor: colorTheme,
+							fontSize: "1.1em",
+							borderRadius: "inherit",
+							// "&:hover": {
+							// 	backgroundColor: colorTheme,
+							// },
+						}}
+						id="sign-out"
+						onClick={logOut}
+					>
+						Déconnexion
+					</Button>
+				</Box>
 			</Drawer>
 		</>
 	);
